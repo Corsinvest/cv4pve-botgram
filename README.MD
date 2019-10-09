@@ -63,15 +63,15 @@ You don’t need to write any code for this. In fact, you don’t even need your
 
 * Search for the “botfather” telegram bot (he’s the one that’ll assist you with creating and managing your bot)
 
-![0](/images/0.png)
+![0](/Images/0.png)
 
 * Type **/help** to see all possible commands the botfather can handle
 
-![1](/images/1.png)
+![1](/Images/1.png)
 
 * Click on or type **/newbot** to create a new bot.
 
-![2](/images/2.png)
+![2](/Images/2.png)
 
 Follow instructions and make a new name for your bot. If you are making a bot just for experimentation, it can be useful to namespace your bot by placing your name before it in its username, since it has to be a unique name. Although, its screen name can be whatever you like.
 I have chosen “Frank Test PVE Bot” as the screen name and “frank_test_pve_bot” as its username.
