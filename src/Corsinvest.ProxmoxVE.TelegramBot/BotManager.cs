@@ -1,19 +1,13 @@
 ﻿/*
  * This file is part of the cv4pve-botgram https://github.com/Corsinvest/cv4pve-botgram,
- * Copyright (C) 2016 Corsinvest Srl
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Corsinvest Enterprise License (CEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
  */
 
 using System;
@@ -29,8 +23,8 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
 {
     public class BotManager
     {
-        private TelegramBotClient _client;
-        private Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
+        private readonly TelegramBotClient _client;
+        private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
 
         public BotManager(string token)
         {
@@ -55,13 +49,13 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
         public void StartReceiving() => _client.StartReceiving(Array.Empty<UpdateType>());
         public void StopReceiving() => _client.StopReceiving();
 
-        private async void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
+        private static async void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
             => await Console.Out.WriteLineAsync($"Received error: {e.Exception.Source} — {e.Exception.Message}");
 
-        private async void OnReceiveError(object sender, ReceiveErrorEventArgs e)
+        private static async void OnReceiveError(object sender, ReceiveErrorEventArgs e)
             => await Console.Out.WriteLineAsync($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}");
 
-        private async void OnInlineResultChosen(object sender, ChosenInlineResultEventArgs e)
+        private static async void OnInlineResultChosen(object sender, ChosenInlineResultEventArgs e)
             => await Console.Out.WriteLineAsync($"OnInlineResultChosen: {e.ChosenInlineResult.ResultId}");
 
         private async void OnCallbackQuery(object sender, CallbackQueryEventArgs e)
@@ -102,8 +96,8 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
             await Console.Out.WriteLineAsync($"Message Type: {e.Message.Type}");
 
 
-            var command = e.Message.Type == MessageType.Text ? 
-                                Command.GetCommand(e.Message.Text):
+            var command = e.Message.Type == MessageType.Text ?
+                                Command.GetCommand(e.Message.Text) :
                                 null;
 
             var exists = _lastCommandForChat.ContainsKey(chatId);

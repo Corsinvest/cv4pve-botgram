@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>cv4pve-botgram</AssemblyName>
     <Company>Corsinvest Srl</Company>
@@ -18,7 +18,7 @@
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
 
     <!-- <ProjectReference Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Extension\Corsinvest.ProxmoxVE.Api.Extension.csproj" /> -->
+    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="2.1.0" />
     <PackageReference Include="Telegram.Bot" Version="15.0.0" />
-    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="2.0.0" />
   </ItemGroup>
 </Project>

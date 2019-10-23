@@ -1,17 +1,8 @@
 # cv4pve-botgram
 
-[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-botgram.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-[![AppVeyor branch](https://img.shields.io/appveyor/ci/franklupo/cv4pve-botgram/master.svg)](https://ci.appveyor.com/project/franklupo/cv4pve-botgram) [![Donate to this project using Palpal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=PPM9JHLQLRV2S&item_name=Open+Source+Project&currency_code=EUR&source=url)
-
-ProxmoxVE Client API .Net
+[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-botgram.svg)](LICENSE.md) [![AppVeyor branch](https://img.shields.io/appveyor/ci/franklupo/cv4pve-botgram/master.svg)](https://ci.appveyor.com/project/franklupo/cv4pve-botgram)
 
 [ProxmoxVE Api](https://pve.proxmox.com/pve-docs/api-viewer/)
-
-# **Donations**
-
-If you like my work and want to support it, then please consider to deposit a donation through **Paypal** by clicking on the next button:
-
-[![paypal](https://www.paypalobjects.com/en_US/IT/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=PPM9JHLQLRV2S&item_name=Open+Source+Project&currency_code=EUR&source=url)
 
 ```text
     ______                _                      __
@@ -29,10 +20,20 @@ Options:
   --host        The host name host[:port]
   --username    User name <username>@<realm>
   --password    The password. Specify 'file:path_file' to store password in file.
+  --version     Show version information
   --token       Telegram API token bot
 
-Report bugs to support@corsinvest.it
+Run 'cv4pve-botgram [options] --help' for more information about a command.
 ```
+
+## Copyright and License
+
+Copyright: Corsinvest Srl
+For licensing details please visit [LICENSE.md](LICENSE.md)
+
+## Commercial Support
+
+This software is part of a suite of tools called cv4pve-tools. If you want commercial support, visit the [site](https://www.corsinvest.it/cv4pve-tools)
 
 ## Introduction
 
@@ -53,6 +54,7 @@ this software aims to simplify the management of Proxmox VE single node or clust
 * Installation unzip file extract binary
 * Not require installation in Proxmox VE
 * Execute out side Proxmox VE
+* Call Api Get,Set,Create,Delete
 * Alias command
 * Documentation generated at runtime from server
 * Complex output to document in chat
