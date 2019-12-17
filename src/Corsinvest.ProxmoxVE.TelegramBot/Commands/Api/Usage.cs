@@ -11,7 +11,7 @@
  */
  
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Extension.Utility;
+using Corsinvest.ProxmoxVE.Api.Shell.Utility;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -43,13 +43,14 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                     break;
 
                 case TypeRequest.Resource:
-                    var ret = ApiExplorer.Usage(PveHelper.GetClassApiRoot(),
+                    var ret = ApiExplorer.Usage(PveHelper.GetClassApiRoot(PveHelper.GetClient()),
                                                 message.Text.Trim(),
+                                                ApiExplorer.OutputType.Html,
                                                 true,
                                                 null,
                                                 true);
 
-                    await botClient.SendDocumentAsyncFromText(message.Chat.Id, ret, "Usage.txt");
+                    await botClient.SendDocumentAsyncFromText(message.Chat.Id, ret, "Usage.html");
                     endCommand = true;
                     break;
 

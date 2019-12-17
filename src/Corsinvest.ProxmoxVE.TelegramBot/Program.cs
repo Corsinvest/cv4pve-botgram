@@ -11,7 +11,9 @@
  */
 
 using System;
-using Corsinvest.ProxmoxVE.Api.Extension.Helpers.Shell;
+using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot
 {
@@ -22,8 +24,31 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
         static void Main(string[] args)
         {
             var app = ShellHelper.CreateConsoleApp(APP_NAME, "Telegram bot for Proxmox VE");
-            ShellCommands.Commands(app);
-            app.ExecuteConsoleApp(Console.Out, args);
+
+            var optToken = app.Option("--token", "Telegram API token bot", CommandOptionType.SingleValue)
+                              .DependOn(app, CommandOptionExtension.HOST_OPTION_NAME);
+
+            app.OnExecute(() =>
+            {
+                PveHelper.App = app;
+
+                var botManager = new BotManager(optToken.Value(), app.Out);
+                botManager.StartReceiving();
+
+                app.Out.WriteLine($@"Start listening 
+Telegram
+  Bot User: @{botManager.Username}
+Proxmox VE
+  Host: {PveHelper.App.GetOption(CommandOptionExtension.HOST_OPTION_NAME, true).Value()}
+  Username: {PveHelper.App.GetOption(CommandOptionExtension.USERNAME_OPTION_NAME, true).Value()}");
+
+                Console.ReadLine();
+                botManager.StopReceiving();
+                app.Out.WriteLine("End application");
+            });
+
+
+            app.ExecuteConsoleApp(args);
         }
     }
 }

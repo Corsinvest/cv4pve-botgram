@@ -36,7 +36,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm
                                                  TelegramBotClient botClient)
         {
             var vm = PveHelper.GetClient().GetVM(callbackQuery.Data);
-            vm.SetStatus(StatusRequestVM, false);
+            vm.SetStatus(StatusRequestVM, 0);
 
             await botClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
                                                            $"VM/CT {vm.Id} on node {vm.Node} {StatusRequestVM}!");

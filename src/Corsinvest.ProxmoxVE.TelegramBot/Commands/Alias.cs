@@ -12,13 +12,13 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Extension.Shell;
-using Corsinvest.ProxmoxVE.Api.Extension.Helpers.Shell;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using System.Linq;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
 using System.Collections.Generic;
+using Corsinvest.ProxmoxVE.Api.Shell.Utility;
+using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
 {
@@ -42,7 +42,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
         {
             _aliasManager = new AliasManager()
             {
-                FileName = Path.Combine(ShellHelper.GetApplicationDataDirectory(Program.APP_NAME), "alias.txt")
+                FileName = Path.Combine(ShellHelper.GetApplicationDataDirectory(Program.APP_NAME), "alias.html")
             };
             _aliasManager.Load();
         }
@@ -62,8 +62,9 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
                     {
                         case "List":
                             await botClient.SendDocumentAsyncFromText(message.Chat.Id,
-                                                                      _aliasManager.ToTable(true),
-                                                                      "list.txt");
+                                                                      _aliasManager.ToTable(true,
+                                                                                            TableOutputType.Html),
+                                                                      "alias.html");
                             endCommand = true;
                             break;
 
@@ -82,7 +83,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
                         default: break;
                     }
                     break;
-                
+
                 default: break;
             }
 

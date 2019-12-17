@@ -11,7 +11,7 @@
  */
 
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Extension.Shell;
+using Corsinvest.ProxmoxVE.Api.Shell.Utility;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;

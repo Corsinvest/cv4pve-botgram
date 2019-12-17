@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Extension.Helpers;
-using Corsinvest.ProxmoxVE.Api.Extension.Utility;
+using Corsinvest.ProxmoxVE.Api.Shell.Utility;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -75,7 +75,9 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                 {
                     //fix request
                     resource = resource.Substring(0, resource.IndexOf(StringHelper.CreateArgumentTag(requestArgs[0])) - 1);
-                    var ret = ApiExplorer.ListValues(PveHelper.GetClient(), PveHelper.GetClassApiRoot(), resource);
+
+                    var pveClient = PveHelper.GetClient();
+                    var ret = ApiExplorer.ListValues(pveClient, PveHelper.GetClassApiRoot(pveClient), resource);
                     if (!string.IsNullOrWhiteSpace(ret.Error))
                     {
                         //return error
@@ -101,12 +103,15 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                 }
                 else if (requestArgs.Count() == 0)
                 {
+                    var pveClient = PveHelper.GetClient();
                     //execute request
-                    var ret = ApiExplorer.Execute(PveHelper.GetClient(),
-                                                  PveHelper.GetClassApiRoot(),
+                    var ret = ApiExplorer.Execute(pveClient,
+                                                  PveHelper.GetClassApiRoot(pveClient),
                                                   resource,
                                                   MethodType,
-                                                  ApiExplorer.CreateParameterResource(parameters));
+                                                  ApiExplorer.CreateParameterResource(parameters),
+                                                  false,
+                                                  ApiExplorer.OutputType.Html);
 
                     if (ret.ResultCode != 200)
                     {
@@ -115,7 +120,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                     else
                     {
                         var filename = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resource).Replace("/", "");
-                        await botClient.SendDocumentAsyncFromText(message.Chat.Id, ret.ResultText, $"{filename}.txt");
+                        await botClient.SendDocumentAsyncFromText(message.Chat.Id, ret.ResultText, $"{filename}.html");
                     }
 
                     endCommand = true;

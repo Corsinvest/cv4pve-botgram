@@ -12,6 +12,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Corsinvest.ProxmoxVE.TelegramBot.Commands;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
 using Telegram.Bot;
@@ -24,12 +25,15 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
     public class BotManager
     {
         private readonly TelegramBotClient _client;
+        private readonly TextWriter _out;
         private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
 
-        public BotManager(string token)
+        public BotManager(string token, TextWriter @out)
         {
+            _out = @out;
             _lastCommandForChat = new Dictionary<long, (Message, Command)>();
 
+            //create bootgram telegram
             _client = new TelegramBotClient(token);
 
             var result = _client.GetMeAsync().Result;
@@ -49,18 +53,18 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
         public void StartReceiving() => _client.StartReceiving(Array.Empty<UpdateType>());
         public void StopReceiving() => _client.StopReceiving();
 
-        private static async void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
-            => await Console.Out.WriteLineAsync($"Received error: {e.Exception.Source} — {e.Exception.Message}");
+        private async void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
+            => await _out.WriteLineAsync($"Received error: {e.Exception.Source} — {e.Exception.Message}");
 
-        private static async void OnReceiveError(object sender, ReceiveErrorEventArgs e)
-            => await Console.Out.WriteLineAsync($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}");
+        private async void OnReceiveError(object sender, ReceiveErrorEventArgs e)
+            => await _out.WriteLineAsync($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}");
 
-        private static async void OnInlineResultChosen(object sender, ChosenInlineResultEventArgs e)
-            => await Console.Out.WriteLineAsync($"OnInlineResultChosen: {e.ChosenInlineResult.ResultId}");
+        private async void OnInlineResultChosen(object sender, ChosenInlineResultEventArgs e)
+            => await _out.WriteLineAsync($"OnInlineResultChosen: {e.ChosenInlineResult.ResultId}");
 
         private async void OnCallbackQuery(object sender, CallbackQueryEventArgs e)
         {
-            await Console.Out.WriteLineAsync($"OnCallbackQuery: {e.CallbackQuery.Data}");
+            await _out.WriteLineAsync($"OnCallbackQuery: {e.CallbackQuery.Data}");
 
             var chatId = e.CallbackQuery.Message.Chat.Id;
             await _client.DeleteMessageAsync(chatId, e.CallbackQuery.Message.MessageId);
@@ -82,7 +86,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
             }
             catch (Exception ex)
             {
-                await Console.Out.WriteLineAsync(ex.StackTrace);
+                await _out.WriteLineAsync(ex.StackTrace);
                 await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error CallbackQuery! {ex.Message}");
             }
         }
@@ -90,15 +94,14 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
         private async void OnMessage(object sender, MessageEventArgs e)
         {
             var chatId = e.Message.Chat.Id;
-            await Console.Out.WriteLineAsync($"Chat Id: {chatId}");
-            await Console.Out.WriteLineAsync($"User: {e.Message.Chat.Username} - " +
+            await _out.WriteLineAsync($"Chat Id: {chatId}");
+            await _out.WriteLineAsync($"User: {e.Message.Chat.Username} - " +
                                              $"{e.Message.Chat.FirstName} {e.Message.Chat.LastName}");
-            await Console.Out.WriteLineAsync($"Message Type: {e.Message.Type}");
-
+            await _out.WriteLineAsync($"Message Type: {e.Message.Type}");
 
             var command = e.Message.Type == MessageType.Text ?
-                                Command.GetCommand(e.Message.Text) :
-                                null;
+                            Command.GetCommand(e.Message.Text) :
+                            null;
 
             var exists = _lastCommandForChat.ContainsKey(chatId);
             if (command == null && exists) { command = _lastCommandForChat[chatId].Command; }
@@ -118,7 +121,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
             catch (Exception ex)
             {
                 _lastCommandForChat.Remove(chatId);
-                await Console.Out.WriteLineAsync(ex.StackTrace);
+                await _out.WriteLineAsync(ex.StackTrace);
                 await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error execute command! {ex.Message}");
             }
         }

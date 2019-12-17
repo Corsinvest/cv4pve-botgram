@@ -10,75 +10,21 @@
  * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
  */
 
-using System.Collections.Generic;
-using System.Linq;
 using Corsinvest.ProxmoxVE.Api;
-using Corsinvest.ProxmoxVE.Api.Extension.Helpers.Shell;
 using Corsinvest.ProxmoxVE.Api.Metadata;
+using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers
 {
     public static class PveHelper
     {
         private static ClassApi _classApiRoot;
-        public static string Host { get; set; }
-        public static int Port { get; set; }
-        public static string Username { get; set; }
-        public static string Password { get; set; }
+        public static CommandLineApplication App { get; internal set; }
 
-        public static ClassApi GetClassApiRoot()
-            => _classApiRoot ?? (_classApiRoot = GeneretorClassApi.Generate(Host, Port));
+        public static ClassApi GetClassApiRoot(PveClient client)
+            => _classApiRoot ?? (_classApiRoot = GeneretorClassApi.Generate(client.Hostname, client.Port));
 
-        public static PveClient GetClient()
-        {
-            var client = new PveClient(Host, Port);
-            client.Login(Username, Password);
-            return client;
-        }
-
-        public static ClassApi GetClassApiFromResource(string resource)
-        {
-            if (_classApiRoot == null) { _classApiRoot = GeneretorClassApi.Generate(Host, Port); }
-            return ClassApi.GetFromResource(_classApiRoot, resource);
-        }
-
-        public static List<ParameterApi> GetClassApiReturnParameters(string resource)
-        {
-            return GetClassApiFromResource(resource)?.Methods
-                                                     .Where(a => a.IsGet)
-                                                     .FirstOrDefault()
-                                                     .ReturnParameters;
-        }
-
-        public static string GetTableFromResource(PveClient client, string resource)
-        {
-            var result = client.Get(resource);
-            var ret = "";
-
-            if (!result.IsSuccessStatusCode)
-            {
-                ret = result.ReasonPhrase;
-            }
-            else
-            {
-                var returnParameters = GetClassApiReturnParameters(resource);
-
-                if (returnParameters == null || returnParameters.Count == 0)
-                {
-                    ret = TableHelper.CreateTable(result.Response.data);
-                }
-                else
-                {
-                    var keys = returnParameters.OrderBy(a => a.Optional)
-                                               .ThenBy(a => a.Name)
-                                               .Select(a => a.Name)
-                                               .ToArray();
-
-                    ret = TableHelper.CreateTable(result.Response.data, keys, returnParameters);
-                }
-            }
-
-            return ret;
-        }
-    }
+        public static PveClient GetClient() => App.ClientTryLogin();
+   }
 }
