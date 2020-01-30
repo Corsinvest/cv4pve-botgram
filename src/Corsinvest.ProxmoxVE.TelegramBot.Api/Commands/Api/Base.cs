@@ -15,14 +15,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Extension.Helpers;
-using Corsinvest.ProxmoxVE.Api.Shell.Utility;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using Corsinvest.ProxmoxVE.Api.Extension.Utility;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
 {
-    public abstract class Base : Command
+    internal abstract class Base : Command
     {
         private enum TypeRequest
         {
@@ -68,7 +68,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                 var resource = cmdArgs[0];
                 if (!resource.StartsWith("/")) { resource = "/" + resource; }
                 var requestArgs = StringHelper.GetArgumentTags(resource);
-                var parameters = cmdArgs.ToArray()[1..];
+                var parameters = cmdArgs.Skip(1).ToArray();
                 var parametersArgs = parameters.SelectMany(a => StringHelper.GetArgumentTags(a)).ToList();
 
                 if (requestArgs.Count() > 0)
@@ -144,7 +144,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                 case TypeRequest.Start:
                     _messageText = "";
                     var args = StringHelper.TokenizeCommandLineToList(message.Text);
-                    if (args.Count > 1) { _messageText = string.Join(" ", args.ToArray()[1..]); }
+                    if (args.Count > 1) { _messageText = string.Join(" ", args.Skip(1).ToArray()); }
                     break;
 
                 case TypeRequest.Resource: _messageText = message.Text; break;

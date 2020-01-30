@@ -12,13 +12,14 @@
 
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Extension.VM;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm.Api
 {
-    public abstract class Base : Command
+    internal abstract class Base : Command
     {
         protected abstract StatusEnum StatusRequestVM { get; }
 

@@ -13,23 +13,44 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Corsinvest.ProxmoxVE.TelegramBot.Commands;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using System.Threading.Tasks;
+using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api
 {
+    /// <summary>
+    /// Botmanager
+    /// </summary>
     public class BotManager
     {
         private readonly TelegramBotClient _client;
         private readonly TextWriter _out;
         private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
 
-        public BotManager(string token, TextWriter @out)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="pveHostandPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
+        /// <param name="pveUsername">Proxmox VE username</param>
+        /// <param name="pvePassword">Proxmox VE password</param>
+        /// <param name="token">Token Telegram Bot</param>
+        /// <param name="out">Output write</param>
+        public BotManager(string pveHostandPortHA,
+                          string pveUsername,
+                          string pvePassword,
+                          string token,
+                          TextWriter @out)
         {
+            PveHelper.HostandPortHA = pveHostandPortHA;
+            PveHelper.Username = pveUsername;
+            PveHelper.Password = pvePassword;
+            PveHelper.Out = @out;
+
             _out = @out;
             _lastCommandForChat = new Dictionary<long, (Message, Command)>();
 
@@ -48,9 +69,37 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
             _client.OnReceiveGeneralError += OnReceiveGeneralError;
         }
 
+        /// <summary>
+        /// Chat username
+        /// </summary>
+        /// <value></value>
         public string Username { get; }
 
-        public void StartReceiving() => _client.StartReceiving(Array.Empty<UpdateType>());
+        /// <summary>
+        /// Send message
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="message"></param>
+        public async Task SendMessageAsync(long chatId, string message) => await _client.SendTextMessageAsync(chatId, message);
+
+        /// <summary>
+        /// Start chat
+        /// </summary>
+        public void StartReceiving()
+        {
+            _client.StartReceiving(Array.Empty<UpdateType>());
+
+            _out.WriteLine($@"Start listening 
+Telegram
+  Bot User: @{Username}
+Proxmox VE
+  Host: {PveHelper.HostandPortHA}
+  Username: {PveHelper.Username}");
+        }
+
+        /// <summary>
+        /// Stop chat
+        /// </summary>
         public void StopReceiving() => _client.StopReceiving();
 
         private async void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
@@ -94,10 +143,12 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
         private async void OnMessage(object sender, MessageEventArgs e)
         {
             var chatId = e.Message.Chat.Id;
-            await _out.WriteLineAsync($"Chat Id: {chatId}");
-            await _out.WriteLineAsync($"User: {e.Message.Chat.Username} - " +
-                                             $"{e.Message.Chat.FirstName} {e.Message.Chat.LastName}");
-            await _out.WriteLineAsync($"Message Type: {e.Message.Type}");
+            var log = $"{e.Message.Date} - Chat Id: '{chatId}'";
+            log += $" User: '{e.Message.Chat.Username}'";
+            log += $" - '{e.Message.Chat.FirstName} {e.Message.Chat.LastName}'";
+            log += $" Msg Type: '{e.Message.Type}'";
+            if (e.Message.Type == MessageType.Text) { log += $"=> '{e.Message.Text}'"; }
+            await _out.WriteLineAsync(log);
 
             var command = e.Message.Type == MessageType.Text ?
                             Command.GetCommand(e.Message.Text) :

@@ -9,16 +9,16 @@
  *
  * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
  */
- 
+
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Shell.Utility;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using Corsinvest.ProxmoxVE.Api.Extension.Utility;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
 {
-    public class Usage : Command
+    internal class Usage : Command
     {
         private enum TypeRequest
         {

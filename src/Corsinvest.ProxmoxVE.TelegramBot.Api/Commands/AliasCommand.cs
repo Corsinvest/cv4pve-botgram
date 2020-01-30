@@ -11,14 +11,14 @@
  */
 
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Shell.Utility;
+using Corsinvest.ProxmoxVE.Api.Extension.Utility;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
 {
-    public class AliasCommand : Command
+    internal class AliasCommand : Command
     {
         private readonly AliasDef _aliasDef;
         private Command _commandRef;

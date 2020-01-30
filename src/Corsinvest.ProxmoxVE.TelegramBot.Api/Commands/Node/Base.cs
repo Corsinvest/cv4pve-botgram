@@ -11,13 +11,14 @@
  */
 
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Node
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Node.Api
 {
-    public abstract class Base : Command
+    internal abstract class Base : Command
     {
         protected abstract bool ForReboot { get; }
 

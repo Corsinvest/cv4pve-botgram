@@ -10,21 +10,31 @@
  * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
  */
 
+using System.IO;
 using Corsinvest.ProxmoxVE.Api;
+using Corsinvest.ProxmoxVE.Api.Extension.Helpers;
 using Corsinvest.ProxmoxVE.Api.Metadata;
-using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
-using McMaster.Extensions.CommandLineUtils;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers
+namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
 {
-    public static class PveHelper
+    internal static class PveHelper
     {
         private static ClassApi _classApiRoot;
-        public static CommandLineApplication App { get; internal set; }
+
+        public static string HostandPortHA { get; set; }
+        public static string Username { get; set; }
+        public static string Password { get; set; }
+        public static TextWriter Out { get; internal set; }
 
         public static ClassApi GetClassApiRoot(PveClient client)
             => _classApiRoot ?? (_classApiRoot = GeneretorClassApi.Generate(client.Hostname, client.Port));
 
-        public static PveClient GetClient() => App.ClientTryLogin();
-   }
+
+        public static PveClient GetClient()
+        {
+            var client = ClientHelper.GetClientFromHA(HostandPortHA, Out);
+            client.Login(Username, Password);
+            return client;
+        }
+    }
 }

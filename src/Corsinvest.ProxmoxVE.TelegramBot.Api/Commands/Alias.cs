@@ -15,14 +15,14 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using System.Linq;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
 using System.Collections.Generic;
-using Corsinvest.ProxmoxVE.Api.Shell.Utility;
-using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Corsinvest.ProxmoxVE.Api.Extension.Helpers;
+using Corsinvest.ProxmoxVE.Api.Extension.Utility;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
 {
-    public class Alias : Command
+    internal class Alias : Command
     {
         private enum RequestType
         {
@@ -42,7 +42,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands
         {
             _aliasManager = new AliasManager()
             {
-                FileName = Path.Combine(ShellHelper.GetApplicationDataDirectory(Program.APP_NAME), "alias.html")
+                FileName = Path.Combine(ApplicationHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt")
             };
             _aliasManager.Load();
         }

@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{61C3AAF0-616
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Corsinvest.ProxmoxVE.TelegramBot", "src\Corsinvest.ProxmoxVE.TelegramBot\Corsinvest.ProxmoxVE.TelegramBot.csproj", "{49D562AF-4C8B-4C3F-B50E-D91AADDAE689}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Corsinvest.ProxmoxVE.TelegramBot.Api", "src\Corsinvest.ProxmoxVE.TelegramBot.Api\Corsinvest.ProxmoxVE.TelegramBot.Api.csproj", "{5DFB953B-569D-4A51-AA8F-419DC48851FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,8 +34,21 @@ Global
 		{49D562AF-4C8B-4C3F-B50E-D91AADDAE689}.Release|x64.Build.0 = Release|Any CPU
 		{49D562AF-4C8B-4C3F-B50E-D91AADDAE689}.Release|x86.ActiveCfg = Release|Any CPU
 		{49D562AF-4C8B-4C3F-B50E-D91AADDAE689}.Release|x86.Build.0 = Release|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Debug|x64.Build.0 = Debug|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Debug|x86.Build.0 = Debug|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Release|x64.ActiveCfg = Release|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Release|x64.Build.0 = Release|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Release|x86.ActiveCfg = Release|Any CPU
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{49D562AF-4C8B-4C3F-B50E-D91AADDAE689} = {61C3AAF0-616E-4F29-B3F8-55220030E433}
+		{5DFB953B-569D-4A51-AA8F-419DC48851FB} = {61C3AAF0-616E-4F29-B3F8-55220030E433}
 	EndGlobalSection
 EndGlobal

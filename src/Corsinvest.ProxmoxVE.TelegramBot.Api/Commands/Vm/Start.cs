@@ -12,12 +12,12 @@
  
 using Corsinvest.ProxmoxVE.Api.Extension.VM;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm.Api
 {
-    public class Shutdown : Base
+    internal class Start : Base
     {
-        public override string Name => "vmshutdown";
-        public override string Description => "Shutdown VM/CT";
-        protected override StatusEnum StatusRequestVM => StatusEnum.Shutdown;
+        public override string Name => "vmstart";
+        public override string Description => "Start VM/CT";
+        protected override StatusEnum StatusRequestVM => StatusEnum.Start;
     }
 }

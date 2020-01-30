@@ -12,41 +12,36 @@
 
 using System;
 using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers;
+using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot
 {
     class Program
     {
-        public static string APP_NAME = "cv4pve-botgram";
-
         static void Main(string[] args)
         {
-            var app = ShellHelper.CreateConsoleApp(APP_NAME, "Telegram bot for Proxmox VE");
+            var app = ShellHelper.CreateConsoleApp("cv4pve-botgram", "Telegram bot for Proxmox VE");
 
             var optToken = app.Option("--token", "Telegram API token bot", CommandOptionType.SingleValue)
                               .DependOn(app, CommandOptionExtension.HOST_OPTION_NAME);
 
             app.OnExecute(() =>
             {
-                PveHelper.App = app;
+                var host = app.GetOption(CommandOptionExtension.HOST_OPTION_NAME, true).Value();
+                var username = app.GetOption(CommandOptionExtension.USERNAME_OPTION_NAME, true).Value();
 
-                var botManager = new BotManager(optToken.Value(), app.Out);
+                var botManager = new BotManager(host,
+                                                username,
+                                                app.GetOption(CommandOptionExtension.PASSWORD_OPTION_NAME, true).Value(),
+                                                optToken.Value(),
+                                                app.Out);
                 botManager.StartReceiving();
 
-                app.Out.WriteLine($@"Start listening 
-Telegram
-  Bot User: @{botManager.Username}
-Proxmox VE
-  Host: {PveHelper.App.GetOption(CommandOptionExtension.HOST_OPTION_NAME, true).Value()}
-  Username: {PveHelper.App.GetOption(CommandOptionExtension.USERNAME_OPTION_NAME, true).Value()}");
-
                 Console.ReadLine();
-                botManager.StopReceiving();
+                //  botManager.StopReceiving();
                 app.Out.WriteLine("End application");
             });
-
 
             app.ExecuteConsoleApp(args);
         }

@@ -24,9 +24,9 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers
+namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
 {
-    public static class BotHelper
+    internal static class BotHelper
     {
         public static async Task<Message> SendTextMessageAsyncNoKeyboard(this TelegramBotClient botClient,
                                                                          long chatId,
