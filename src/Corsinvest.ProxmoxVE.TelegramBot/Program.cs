@@ -28,18 +28,18 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
 
             app.OnExecute(() =>
             {
-                var host = app.GetOption(CommandOptionExtension.HOST_OPTION_NAME, true).Value();
-                var username = app.GetOption(CommandOptionExtension.USERNAME_OPTION_NAME, true).Value();
-
-                var botManager = new BotManager(host,
-                                                username,
-                                                app.GetOption(CommandOptionExtension.PASSWORD_OPTION_NAME, true).Value(),
+                var botManager = new BotManager(app.GetHost().Value(),
+                                                app.GetUsername().Value(),
+                                                app.GetPasswordFromOption(),
                                                 optToken.Value(),
                                                 app.Out);
                 botManager.StartReceiving();
 
                 Console.ReadLine();
-                //  botManager.StopReceiving();
+
+                try { botManager.StopReceiving(); }
+                catch { }
+
                 app.Out.WriteLine("End application");
             });
 

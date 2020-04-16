@@ -62,8 +62,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
                     {
                         case "List":
                             await botClient.SendDocumentAsyncFromText(message.Chat.Id,
-                                                                      _aliasManager.ToTable(true,
-                                                                                            TableOutputType.Html),
+                                                                      _aliasManager.ToTable(true, TableOutputType.Html),
                                                                       "alias.html");
                             endCommand = true;
                             break;
