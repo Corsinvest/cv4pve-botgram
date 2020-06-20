@@ -41,10 +41,8 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
                                                                     string text,
                                                                     string fileName)
         {
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(text)))
-            {
-                return await botClient.SendDocumentAsync(chatId, new InputOnlineFile(stream, fileName));
-            }
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            return await botClient.SendDocumentAsync(chatId, new InputOnlineFile(stream, fileName));
         }
 
         public static List<List<InlineKeyboardButton>> CreateInlineKeyboardButtons(IEnumerable<(string Group, string Text, string CallbackData)> items)

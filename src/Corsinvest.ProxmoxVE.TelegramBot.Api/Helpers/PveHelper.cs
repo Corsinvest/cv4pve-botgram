@@ -27,7 +27,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
         public static TextWriter Out { get; internal set; }
 
         public static ClassApi GetClassApiRoot(PveClient client)
-            => _classApiRoot ?? (_classApiRoot = GeneretorClassApi.Generate(client.Hostname, client.Port));
+            => _classApiRoot ??= GeneretorClassApi.Generate(client.Hostname, client.Port);
 
         public static PveClient GetClient()
         {

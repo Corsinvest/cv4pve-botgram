@@ -38,8 +38,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
             {
                 case TypeRequest.Start:
                     _typeRequest = TypeRequest.Resource;
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
-                                                                   "Insert <b>resource</b> (eg nodes)");
+                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, Base.DEFAULT_MSG);
                     break;
 
                 case TypeRequest.Resource:

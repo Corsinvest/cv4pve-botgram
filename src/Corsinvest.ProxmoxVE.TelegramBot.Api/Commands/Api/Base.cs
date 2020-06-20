@@ -10,6 +10,7 @@
  * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
  */
 
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,10 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
 {
     internal abstract class Base : Command
     {
+        public static readonly string DEFAULT_MSG = "Insert <b>resource</b> (eg nodes)" +
+                                                    Environment.NewLine + 
+                                                    "More <b>info</b> see documentation <a href = 'https://pve.proxmox.com/pve-docs/api-viewer/index.html'>API</a>";
+
         private enum TypeRequest
         {
             Start,
@@ -60,8 +65,8 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
             {
                 //request resource
                 _typeRequest = TypeRequest.Resource;
-                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
-                                                               "Insert <b>resource</b> (eg nodes)");
+                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, DEFAULT_MSG);
+                //"Insert <b>resource</b> (eg nodes)");
             }
             else
             {
@@ -77,11 +82,11 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
                     resource = resource.Substring(0, resource.IndexOf(StringHelper.CreateArgumentTag(requestArgs[0])) - 1);
 
                     var pveClient = PveHelper.GetClient();
-                    var ret = ApiExplorer.ListValues(pveClient, PveHelper.GetClassApiRoot(pveClient), resource);
-                    if (!string.IsNullOrWhiteSpace(ret.Error))
+                    var (Values, Error) = ApiExplorer.ListValues(pveClient, PveHelper.GetClassApiRoot(pveClient), resource);
+                    if (!string.IsNullOrWhiteSpace(Error))
                     {
                         //return error
-                        await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, ret.Error);
+                        await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, Error);
                         endCommand = true;
                     }
                     else
@@ -90,7 +95,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
 
                         await botClient.ChooseInlineKeyboard(message.Chat.Id,
                                                              $"Choose {requestArgs[0]}",
-                                                             ret.Values.Select(a => ("", a.Value, a.Value)));
+                                                             Values.Select(a => ("", a.Value, a.Value)));
                     }
                 }
                 else if (parametersArgs.Count() > 0)

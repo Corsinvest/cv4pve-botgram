@@ -21,8 +21,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
         public override string Name => "start";
         public override string Description => "Start";
         protected override string GetText(Message message)
-            => $@"Corsinvest for Proxmox VE with Telegram Bot
-Welcome {message.Chat.FirstName}
+            => $@"Welcome {message.Chat.FirstName}
 You are connect to Proxmox VE {PveHelper.HostandPortHA}
 
 {base.GetText(message)}
