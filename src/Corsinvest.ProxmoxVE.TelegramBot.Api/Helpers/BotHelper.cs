@@ -52,7 +52,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
             foreach (var group in items.GroupBy(a => a.Group))
             {
                 var rowIKB = new List<InlineKeyboardButton>();
-                foreach (var item in group)
+                foreach (var (_, Text, CallbackData) in group)
                 {
                     if (rowIKB.Count > 1)
                     {
@@ -60,7 +60,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
                         rowIKB = new List<InlineKeyboardButton>();
                     }
 
-                    rowIKB.Add(InlineKeyboardButton.WithCallbackData(item.Text, item.CallbackData));
+                    rowIKB.Add(InlineKeyboardButton.WithCallbackData(Text, CallbackData));
                 }
 
                 ikb.Add(rowIKB);

@@ -11,6 +11,7 @@
  */
 
 using System;
+using System.CommandLine.Parsing;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
     internal abstract class Base : Command
     {
         public static readonly string DEFAULT_MSG = "Insert <b>resource</b> (eg nodes)" +
-                                                    Environment.NewLine + 
+                                                    Environment.NewLine +
                                                     "More <b>info</b> see documentation <a href = 'https://pve.proxmox.com/pve-docs/api-viewer/index.html'>API</a>";
 
         private enum TypeRequest
@@ -60,13 +61,12 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
         private async Task<bool> ExecuteOrChoose(Message message, TelegramBotClient botClient)
         {
             var endCommand = false;
-            var cmdArgs = StringHelper.TokenizeCommandLineToList(_messageText);
+            var cmdArgs = ParserExtensions.Parse(new Parser(), _messageText).Tokens.Select(a => a.Value).ToList();
             if (cmdArgs.Count == 0)
             {
                 //request resource
                 _typeRequest = TypeRequest.Resource;
                 await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, DEFAULT_MSG);
-                //"Insert <b>resource</b> (eg nodes)");
             }
             else
             {
@@ -110,22 +110,22 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
                 {
                     var pveClient = PveHelper.GetClient();
                     //execute request
-                    var ret = ApiExplorer.Execute(pveClient,
-                                                  PveHelper.GetClassApiRoot(pveClient),
-                                                  resource,
-                                                  MethodType,
-                                                  ApiExplorer.CreateParameterResource(parameters),
-                                                  false,
-                                                  ApiExplorer.OutputType.Html);
+                    var (ResultCode, ResultText) = ApiExplorer.Execute(pveClient,
+                                                                       PveHelper.GetClassApiRoot(pveClient),
+                                                                       resource,
+                                                                       MethodType,
+                                                                       ApiExplorer.CreateParameterResource(parameters),
+                                                                       false,
+                                                                       ApiExplorer.OutputType.Html);
 
-                    if (ret.ResultCode != 200)
+                    if (ResultCode != 200)
                     {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ret.ResultText}");
+                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ResultText}");
                     }
                     else
                     {
                         var filename = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resource).Replace("/", "");
-                        await botClient.SendDocumentAsyncFromText(message.Chat.Id, ret.ResultText, $"{filename}.html");
+                        await botClient.SendDocumentAsyncFromText(message.Chat.Id, ResultText, $"{filename}.html");
                     }
 
                     endCommand = true;
@@ -148,7 +148,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api
             {
                 case TypeRequest.Start:
                     _messageText = "";
-                    var args = StringHelper.TokenizeCommandLineToList(message.Text);
+                    var args = ParserExtensions.Parse(new Parser(), _messageText).Tokens.Select(a => a.Value).ToList();
                     if (args.Count > 1) { _messageText = string.Join(" ", args.Skip(1).ToArray()); }
                     break;
 

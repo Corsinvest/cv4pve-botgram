@@ -40,7 +40,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api
 
         public Alias()
         {
-            _aliasManager = new AliasManager()
+            _aliasManager = new AliasManager
             {
                 FileName = Path.Combine(ApplicationHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt")
             };

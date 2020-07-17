@@ -11,6 +11,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
 using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using McMaster.Extensions.CommandLineUtils;
@@ -26,12 +27,21 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
             var optToken = app.Option("--token", "Telegram API token bot", CommandOptionType.SingleValue)
                               .DependOn(app, CommandOptionExtension.HOST_OPTION_NAME);
 
+            var optChatsId = app.Option("--chatsId", "Telegram Chats Id valid for communication (comma separated)", CommandOptionType.SingleValue);
+
             app.OnExecute(() =>
             {
+                var chatsId = new List<long>();
+                foreach (var chatId in (optChatsId.Value() + "").Split(","))
+                {
+                    if (long.TryParse(chatId, out var id)) { chatsId.Add(id); }
+                }
+
                 var botManager = new BotManager(app.GetHost().Value(),
                                                 app.GetUsername().Value(),
                                                 app.GetPasswordFromOption(),
                                                 optToken.Value(),
+                                                chatsId.ToArray(),
                                                 app.Out);
                 botManager.StartReceiving();
 

@@ -22,6 +22,7 @@ Options:
   --username        User name <username>@<realm>
   --password        The password. Specify 'file:path_file' to store password in file.
   --token           Telegram API token bot
+  --chatsId         Telegram Chats Id valid for communication (comma separated)
 
 Commands:
   app-check-update  Check update application
@@ -67,6 +68,7 @@ this software aims to simplify the management of Proxmox VE single node or clust
 * Alias command
 * Documentation generated at runtime from server
 * Complex output to document in chat
+* Valid ChatsId for communication
 
 ## Set up your bot in Telegram
 

@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
@@ -29,6 +30,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api
     public class BotManager
     {
         private readonly TelegramBotClient _client;
+        private readonly long[] _chatsIdValid;
         private readonly TextWriter _out;
         private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
 
@@ -39,11 +41,13 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api
         /// <param name="pveUsername">Proxmox VE username</param>
         /// <param name="pvePassword">Proxmox VE password</param>
         /// <param name="token">Token Telegram Bot</param>
+        /// <param name="chatsIdValid">Valid chats Id</param>
         /// <param name="out">Output write</param>
         public BotManager(string pveHostandPortHA,
                           string pveUsername,
                           string pvePassword,
                           string token,
+                          long[] chatsIdValid,
                           TextWriter @out)
         {
             PveHelper.HostandPortHA = pveHostandPortHA;
@@ -51,6 +55,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api
             PveHelper.Password = pvePassword;
             PveHelper.Out = @out;
 
+            _chatsIdValid = chatsIdValid;
             _out = @out;
             _lastCommandForChat = new Dictionary<long, (Message, Command)>();
 
@@ -89,7 +94,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api
         {
             _client.StartReceiving(Array.Empty<UpdateType>());
 
-            _out.WriteLine($@"Start listening 
+            _out.WriteLine($@"Start listening
 Telegram
   Bot User: @{Username}
 Proxmox VE
@@ -143,12 +148,20 @@ Proxmox VE
         private async void OnMessage(object sender, MessageEventArgs e)
         {
             var chatId = e.Message.Chat.Id;
-            var log = $"{e.Message.Date} - Chat Id: '{chatId}'";
-            log += $" User: '{e.Message.Chat.Username}'";
-            log += $" - '{e.Message.Chat.FirstName} {e.Message.Chat.LastName}'";
-            log += $" Msg Type: '{e.Message.Type}'";
+            var log = $"{e.Message.Date} - Chat Id: '{chatId}'" +
+                      $" User: '{e.Message.Chat.Username}'" +
+                      $" - '{e.Message.Chat.FirstName} {e.Message.Chat.LastName}'" +
+                      $" Msg Type: '{e.Message.Type}'";
             if (e.Message.Type == MessageType.Text) { log += $"=> '{e.Message.Text}'"; }
             await _out.WriteLineAsync(log);
+
+            //check security Chat
+            if (_chatsIdValid.Count() > 0 && !_chatsIdValid.Contains(chatId))
+            {
+                await _out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{e.Message.Chat.Username}' not permitted access!");
+                await _client.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
+                return;
+            }
 
             var command = e.Message.Type == MessageType.Text ?
                             Command.GetCommand(e.Message.Text) :
