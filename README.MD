@@ -56,13 +56,6 @@ this software aims to simplify the management of Proxmox VE single node or clust
 * access using chat mobile
 * Support multiple host for HA in --host parameter es. host[:port],host1[:port],host2[:port]
 * Check-Update and Upgrade application
-* Use Api token --api-token parameter
-
-## Api token
-
-From version 6.2 of Proxmox VE is possible to use [Api token](https://pve.proxmox.com/pve-docs/pveum-plain.html).
-This feature permit execute Api without using user and password.
-If using **Privilege Separation** when create api token remember specify in permission.
 
 ## Main features
 
@@ -77,6 +70,13 @@ If using **Privilege Separation** when create api token remember specify in perm
 * Documentation generated at runtime from server
 * Complex output to document in chat
 * Valid ChatsId for communication
+* Use Api token --api-token parameter
+
+## Api token
+
+From version 6.2 of Proxmox VE is possible to use [Api token](https://pve.proxmox.com/pve-docs/pveum-plain.html).
+This feature permit execute Api without using user and password.
+If using **Privilege Separation** when create api token remember specify in permission.
 
 ## Set up your bot in Telegram
 
