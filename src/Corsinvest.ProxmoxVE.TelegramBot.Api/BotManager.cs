@@ -38,12 +38,14 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api
         /// Constructor
         /// </summary>
         /// <param name="pveHostandPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
+        /// <param name="pveApiToken">Proxmox VE Api Token</param>
         /// <param name="pveUsername">Proxmox VE username</param>
         /// <param name="pvePassword">Proxmox VE password</param>
         /// <param name="token">Token Telegram Bot</param>
         /// <param name="chatsIdValid">Valid chats Id</param>
         /// <param name="out">Output write</param>
         public BotManager(string pveHostandPortHA,
+                          string pveApiToken,
                           string pveUsername,
                           string pvePassword,
                           string token,
@@ -51,6 +53,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api
                           TextWriter @out)
         {
             PveHelper.HostandPortHA = pveHostandPortHA;
+            PveHelper.ApiToken = pveApiToken;
             PveHelper.Username = pveUsername;
             PveHelper.Password = pvePassword;
             PveHelper.Out = @out;

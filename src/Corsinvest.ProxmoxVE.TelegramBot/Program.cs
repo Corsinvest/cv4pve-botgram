@@ -38,6 +38,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot
                 }
 
                 var botManager = new BotManager(app.GetHost().Value(),
+                                                app.GetApiToken().Value(),
                                                 app.GetUsername().Value(),
                                                 app.GetPasswordFromOption(),
                                                 optToken.Value(),

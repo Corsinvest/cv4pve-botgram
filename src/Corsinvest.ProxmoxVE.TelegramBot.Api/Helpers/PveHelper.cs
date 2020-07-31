@@ -24,7 +24,8 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
         public static string HostandPortHA { get; set; }
         public static string Username { get; set; }
         public static string Password { get; set; }
-        public static TextWriter Out { get; internal set; }
+        public static string ApiToken { get; set; }
+        public static TextWriter Out { get; set; }
 
         public static ClassApi GetClassApiRoot(PveClient client)
             => _classApiRoot ??= GeneretorClassApi.Generate(client.Hostname, client.Port);
@@ -32,7 +33,15 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api
         public static PveClient GetClient()
         {
             var client = ClientHelper.GetClientFromHA(HostandPortHA, Out);
-            client.Login(Username, Password);
+            if (string.IsNullOrWhiteSpace(ApiToken))
+            {
+                client.Login(Username, Password);
+            }
+            else
+            {
+                client.ApiToken = ApiToken;
+            }
+
             return client;
         }
     }
