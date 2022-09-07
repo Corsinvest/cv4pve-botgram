@@ -32,9 +32,8 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/src/Corsinvest.ProxmoxVE.TelegramBot/Corsinvest.ProxmoxVE.TelegramBot.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "--project",
+                "${workspaceFolder}/src/Corsinvest.ProxmoxVE.TelegramBot/Corsinvest.ProxmoxVE.TelegramBot.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

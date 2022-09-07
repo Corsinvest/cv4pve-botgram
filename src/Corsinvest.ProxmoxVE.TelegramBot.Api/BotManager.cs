@@ -1,196 +1,220 @@
 ﻿/*
- * This file is part of the cv4pve-botgram https://github.com/Corsinvest/cv4pve-botgram,
- *
- * This source file is available under two different licenses:
- * - GNU General Public License version 3 (GPLv3)
- * - Corsinvest Enterprise License (CEL)
- * Full copyright and license information is available in
- * LICENSE.md which is distributed with this source code.
- *
- * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
+ * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
  */
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
-using Telegram.Bot.Args;
+using Telegram.Bot.Exceptions;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Api
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api;
+
+/// <summary>
+/// Bot Manager
+/// </summary>
+public class BotManager
 {
+    private readonly TelegramBotClient _client;
+    private readonly long[] _chatsIdValid;
+    private readonly TextWriter _out;
+    private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
+    private CancellationTokenSource Cts;
+
     /// <summary>
-    /// Botmanager
+    /// Constructor
     /// </summary>
-    public class BotManager
+    /// <param name="pveHostAndPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
+    /// <param name="pveApiToken">Proxmox VE Api Token</param>
+    /// <param name="pveUsername">Proxmox VE username</param>
+    /// <param name="pvePassword">Proxmox VE password</param>
+    /// <param name="token">Token Telegram Bot</param>
+    /// <param name="chatsIdValid">Valid chats Id</param>
+    /// <param name="out">Output write</param>
+    public BotManager(string pveHostAndPortHA,
+                      string pveApiToken,
+                      string pveUsername,
+                      string pvePassword,
+                      string token,
+                      long[] chatsIdValid,
+                      TextWriter @out)
     {
-        private readonly TelegramBotClient _client;
-        private readonly long[] _chatsIdValid;
-        private readonly TextWriter _out;
-        private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
+        PveHelperInt.HostAndPortHA = pveHostAndPortHA;
+        PveHelperInt.ApiToken = pveApiToken;
+        PveHelperInt.Username = pveUsername;
+        PveHelperInt.Password = pvePassword;
+        PveHelperInt.Out = @out;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="pveHostandPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
-        /// <param name="pveApiToken">Proxmox VE Api Token</param>
-        /// <param name="pveUsername">Proxmox VE username</param>
-        /// <param name="pvePassword">Proxmox VE password</param>
-        /// <param name="token">Token Telegram Bot</param>
-        /// <param name="chatsIdValid">Valid chats Id</param>
-        /// <param name="out">Output write</param>
-        public BotManager(string pveHostandPortHA,
-                          string pveApiToken,
-                          string pveUsername,
-                          string pvePassword,
-                          string token,
-                          long[] chatsIdValid,
-                          TextWriter @out)
-        {
-            PveHelper.HostandPortHA = pveHostandPortHA;
-            PveHelper.ApiToken = pveApiToken;
-            PveHelper.Username = pveUsername;
-            PveHelper.Password = pvePassword;
-            PveHelper.Out = @out;
+        _chatsIdValid = chatsIdValid;
+        _out = @out;
+        _lastCommandForChat = new Dictionary<long, (Message, Command)>();
 
-            _chatsIdValid = chatsIdValid;
-            _out = @out;
-            _lastCommandForChat = new Dictionary<long, (Message, Command)>();
+        //create telegram
+        _client = new TelegramBotClient(token);
+    }
 
-            //create bootgram telegram
-            _client = new TelegramBotClient(token);
+    /// <summary>
+    /// Bot Id
+    /// </summary>
+    public long? BootId => _client.BotId;
 
-            var result = _client.GetMeAsync().Result;
-            Username = result.Username;
+    /// <summary>
+    /// Chat username
+    /// </summary>
+    /// <value></value>
+    public string Username { get; private set; }
 
-            _client.OnMessage += OnMessage;
-            _client.OnMessageEdited += OnMessage;
-            _client.OnCallbackQuery += OnCallbackQuery;
-            //Bot.OnInlineQuery += BotOnInlineQueryReceived;
-            _client.OnInlineResultChosen += OnInlineResultChosen;
-            _client.OnReceiveError += OnReceiveError;
-            _client.OnReceiveGeneralError += OnReceiveGeneralError;
-        }
+    /// <summary>
+    /// Send message
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <param name="message"></param>
+    public async Task SendMessageAsync(long chatId, string message) => await _client.SendTextMessageAsync(chatId, message);
 
-        /// <summary>
-        /// Chat username
-        /// </summary>
-        /// <value></value>
-        public string Username { get; }
+    /// <summary>
+    /// Start chat
+    /// </summary>
+    public void StartReceiving()
+    {
+        Cts = new CancellationTokenSource();
 
-        /// <summary>
-        /// Send message
-        /// </summary>
-        /// <param name="chatId"></param>
-        /// <param name="message"></param>
-        public async Task SendMessageAsync(long chatId, string message) => await _client.SendTextMessageAsync(chatId, message);
+        _client.StartReceiving(updateHandler: HandleUpdateAsync,
+                               pollingErrorHandler: HandlePollingErrorAsync,
+                               receiverOptions: new ReceiverOptions
+                               {
+                                   AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+                               },
+                               cancellationToken: Cts.Token);
 
-        /// <summary>
-        /// Start chat
-        /// </summary>
-        public void StartReceiving()
-        {
-            _client.StartReceiving(Array.Empty<UpdateType>());
+        var result = _client.GetMeAsync().Result;
+        Username = result.Username;
 
-            _out.WriteLine($@"Start listening
+        _out.WriteLine($@"Start listening
 Telegram
   Bot User: @{Username}
+  Bot Id: @{BootId}
 Proxmox VE
-  Host: {PveHelper.HostandPortHA}
-  Username: {PveHelper.Username}");
-        }
+  Host: {PveHelperInt.HostAndPortHA}
+  Username: {PveHelperInt.Username}");
+    }
 
-        /// <summary>
-        /// Stop chat
-        /// </summary>
-        public void StopReceiving() => _client.StopReceiving();
+    /// <summary>
+    /// Stop chat
+    /// </summary>
+    public void StopReceiving()
+    {
+        //Send cancellation request to stop bot
+        Cts.Cancel();
+        Cts = null;
+    }
 
-        private async void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
-            => await _out.WriteLineAsync($"Received error: {e.Exception.Source} — {e.Exception.Message}");
-
-        private async void OnReceiveError(object sender, ReceiveErrorEventArgs e)
-            => await _out.WriteLineAsync($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}");
-
-        private async void OnInlineResultChosen(object sender, ChosenInlineResultEventArgs e)
-            => await _out.WriteLineAsync($"OnInlineResultChosen: {e.ChosenInlineResult.ResultId}");
-
-        private async void OnCallbackQuery(object sender, CallbackQueryEventArgs e)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        if (update.CallbackQuery is not null)
         {
-            await _out.WriteLineAsync($"OnCallbackQuery: {e.CallbackQuery.Data}");
-
-            var chatId = e.CallbackQuery.Message.Chat.Id;
-            await _client.DeleteMessageAsync(chatId, e.CallbackQuery.Message.MessageId);
-
-            try
-            {
-                if (_lastCommandForChat.TryGetValue(chatId, out var value))
-                {
-                    if (await value.Command.Execute(value.Message, e.CallbackQuery, _client))
-                    {
-                        _lastCommandForChat.Remove(chatId);
-                    }
-                }
-                else
-                {
-                    _lastCommandForChat.Remove(chatId);
-                    await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Data not recognized '{e.CallbackQuery.Data}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                await _out.WriteLineAsync(ex.StackTrace);
-                await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error CallbackQuery! {ex.Message}");
-            }
+            await ProcessCallbackQuery(update.CallbackQuery);
         }
-
-        private async void OnMessage(object sender, MessageEventArgs e)
+        else if (update.Message is not null)
         {
-            var chatId = e.Message.Chat.Id;
-            var log = $"{e.Message.Date} - Chat Id: '{chatId}'" +
-                      $" User: '{e.Message.Chat.Username}'" +
-                      $" - '{e.Message.Chat.FirstName} {e.Message.Chat.LastName}'" +
-                      $" Msg Type: '{e.Message.Type}'";
-            if (e.Message.Type == MessageType.Text) { log += $"=> '{e.Message.Text}'"; }
-            await _out.WriteLineAsync(log);
+            await ProcessMessage(update.Message);
+        }
+    }
 
-            //check security Chat
-            if (_chatsIdValid.Count() > 0 && !_chatsIdValid.Contains(chatId))
+    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    {
+        var ErrorMessage = exception switch
+        {
+            ApiRequestException apiRequestException
+                => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+            _ => exception.ToString()
+        };
+
+        Console.WriteLine(ErrorMessage);
+        return Task.CompletedTask;
+    }
+
+    private async Task ProcessCallbackQuery(CallbackQuery callbackQuery)
+    {
+        await _out.WriteLineAsync($"OnCallbackQuery: {callbackQuery.Data}");
+
+        var chatId = callbackQuery.Message.Chat.Id;
+        await _client.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
+
+        try
+        {
+            if (_lastCommandForChat.TryGetValue(chatId, out var value))
             {
-                await _out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{e.Message.Chat.Username}' not permitted access!");
-                await _client.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
-                return;
-            }
-
-            var command = e.Message.Type == MessageType.Text ?
-                            Command.GetCommand(e.Message.Text) :
-                            null;
-
-            var exists = _lastCommandForChat.ContainsKey(chatId);
-            if (command == null && exists) { command = _lastCommandForChat[chatId].Command; }
-            if (command == null) { command = new Help(); }
-
-            //save last command and chat
-            if (exists) { _lastCommandForChat.Remove(chatId); }
-            _lastCommandForChat.Add(chatId, (e.Message, command));
-
-            try
-            {
-                if (await command.Execute(e.Message, _client))
+                if (await value.Command.Execute(value.Message, callbackQuery, _client))
                 {
                     _lastCommandForChat.Remove(chatId);
                 }
             }
-            catch (Exception ex)
+            else
             {
                 _lastCommandForChat.Remove(chatId);
-                await _out.WriteLineAsync(ex.StackTrace);
-                await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error execute command! {ex.Message}");
+                await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Data not recognized '{callbackQuery.Data}'");
             }
+        }
+        catch (Exception ex)
+        {
+            await _out.WriteLineAsync(ex.StackTrace);
+            await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error CallbackQuery! {ex.Message}");
+        }
+    }
+
+    private async Task ProcessMessage(Message message)
+    {
+        if (message.Text is not { } messageText) { return; }
+
+        var chatId = message.Chat.Id;
+        var log = $"{message.Date} - Chat Id: '{chatId}'" +
+                  $" User: '{message.Chat.Username}'" +
+                  $" - '{message.Chat.FirstName} {message.Chat.LastName}'" +
+                  $" Msg Type: '{message.Type}'";
+        if (message.Type == MessageType.Text) { log += $"=> '{message.Text}'"; }
+        await _out.WriteLineAsync(log);
+
+        //check security Chat
+        if (_chatsIdValid.Any() && !_chatsIdValid.Contains(chatId))
+        {
+            await _out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{message.Chat.Username}' not permitted access!");
+            await _client.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
+            return;
+        }
+
+        var command = message.Type == MessageType.Text
+                        ? Command.GetCommand(message.Text)
+                        : null;
+
+        var exists = _lastCommandForChat.ContainsKey(chatId);
+        if (command == null && exists) { command = _lastCommandForChat[chatId].Command; }
+        command ??= new Help();
+
+        //save last command and chat
+        if (exists) { _lastCommandForChat.Remove(chatId); }
+        _lastCommandForChat.Add(chatId, (message, command));
+
+        try
+        {
+            if (await command.Execute(message, _client))
+            {
+                _lastCommandForChat.Remove(chatId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _lastCommandForChat.Remove(chatId);
+            await _out.WriteLineAsync(ex.StackTrace);
+            await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error execute command! {ex.Message}");
         }
     }
 }

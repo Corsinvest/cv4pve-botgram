@@ -1,48 +1,43 @@
 ﻿/*
- * This file is part of the cv4pve-botgram https://github.com/Corsinvest/cv4pve-botgram,
- *
- * This source file is available under two different licenses:
- * - GNU General Public License version 3 (GPLv3)
- * - Corsinvest Enterprise License (CEL)
- * Full copyright and license information is available in
- * LICENSE.md which is distributed with this source code.
- *
- * Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
+ * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
  */
 
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Extension.VM;
+using Corsinvest.ProxmoxVE.Api.Extension;
+using Corsinvest.ProxmoxVE.Api.Extension.Utils;
+using Corsinvest.ProxmoxVE.Api.Shared.Models.Vm;
 using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm.Api
+namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm.Api;
+
+internal abstract class Base : Command
 {
-    internal abstract class Base : Command
+    protected abstract VmStatus StatusRequest { get; }
+
+    public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
     {
-        protected abstract StatusEnum StatusRequestVM { get; }
+        await botClient.ChooseVmInlineKeyboard(message.Chat.Id,
+                                               await GetClient(),
+                                               StatusRequest == VmStatus.Stop);
 
-        public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
-        {
-            await botClient.ChooseVmInlineKeyboard(message.Chat.Id,
-                                                   PveHelper.GetClient(),
-                                                   (StatusRequestVM == StatusEnum.Stop));
+        return await Task.FromResult(false);
+    }
 
-            return await Task.FromResult(false);
-        }
+    public override async Task<bool> Execute(Message message,
+                                             CallbackQuery callbackQuery,
+                                             TelegramBotClient botClient)
+    {
+        var client = await GetClient();
+        var vm = await client.GetVm(callbackQuery.Data);
+        await VmHelper.ChangeStatusVm(client, vm.Node, vm.VmType, vm.VmId, StatusRequest);
 
-        public override async Task<bool> Execute(Message message,
-                                                 CallbackQuery callbackQuery,
-                                                 TelegramBotClient botClient)
-        {
-            var vm = PveHelper.GetClient().GetVM(callbackQuery.Data);
-            vm.SetStatus(StatusRequestVM, 0);
+        await botClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
+                                                       $"VM/CT {vm.Id} on node {vm.Node} {StatusRequest}!");
 
-            await botClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
-                                                           $"VM/CT {vm.Id} on node {vm.Node} {StatusRequestVM}!");
-
-            return await Task.FromResult(true);
-        }
+        return await Task.FromResult(true);
     }
 }

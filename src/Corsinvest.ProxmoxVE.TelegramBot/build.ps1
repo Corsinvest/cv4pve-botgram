@@ -1,12 +1,5 @@
-# This file is part of the cv4pve-bootgram https://github.com/Corsinvest/cv4pve-bootgram,
-#
-# This source file is available under two different licenses:
-# - GNU General Public License version 3 (GPLv3)
-# - Corsinvest Enterprise License (CEL)
-# Full copyright and license information is available in
-# LICENSE.md which is distributed with this source code.
-#
-# Copyright (C) 2016 Corsinvest Srl	GPLv3 and CEL
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
 
 [System.Console]::Clear();
 
@@ -23,17 +16,17 @@ Write-Output "
  == Build System
  ========================================================="
 
-$pathNet = "Bin\Release\netcoreapp3.1"
+$pathNet = "Bin\Release\net6.0"
 
 Remove-Item -Path ".\$pathNet"  -Recurse -Force
 
 $rids = @("linux-x64", "linux-arm", "linux-arm64", "osx-x64", "win-x86", "win-x64", "win-arm", "win-arm64")
 foreach ($rid in $rids) {
-    dotnet publish -r $rid -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true
+    dotnet publish -r $rid -c Release /p:PublishSingleFile=true --self-contained #/p:EnableCompressionInSingleFile=true
     $path = "$pathNet\$rid\publish\"
 
     $fileName = Get-ChildItem $path -Exclude *.pdb -name
-    $fileDest = "$pathNet\$fileName-$rid.zip"   
+    $fileDest = "$pathNet\$fileName-$rid.zip"
     Remove-Item $fileDest -ErrorAction SilentlyContinue
     Compress-Archive $path\$fileName $fileDest
 }
