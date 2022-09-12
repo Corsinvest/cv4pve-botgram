@@ -18,7 +18,7 @@ internal abstract class Base : Command
     public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
     {
         await botClient.ChooseNodeInlineKeyboard(message.Chat.Id, await GetClient(), true);
-        return await Task.FromResult(false);
+        return false;
     }
 
     public override async Task<bool> Execute(Message message,

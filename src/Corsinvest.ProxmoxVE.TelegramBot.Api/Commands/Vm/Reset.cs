@@ -11,5 +11,6 @@ internal class Reset : Base
 {
     public override string Name => "vmreset";
     public override string Description => "Reset VM/CT";
-    protected override VmStatus StatusRequest => VmStatus.Reset;
+    protected override VmStatus StatusToChange => VmStatus.Reset;
+    protected override bool StatusVmIsRunning => true;
 }

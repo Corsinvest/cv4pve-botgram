@@ -16,15 +16,15 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm.Api;
 
 internal abstract class Base : Command
 {
-    protected abstract VmStatus StatusRequest { get; }
+    protected abstract VmStatus StatusToChange { get; }
+    protected abstract bool StatusVmIsRunning { get; }
 
     public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
     {
         await botClient.ChooseVmInlineKeyboard(message.Chat.Id,
                                                await GetClient(),
-                                               StatusRequest == VmStatus.Stop);
-
-        return await Task.FromResult(false);
+                                               StatusVmIsRunning);
+        return false;
     }
 
     public override async Task<bool> Execute(Message message,
@@ -33,10 +33,10 @@ internal abstract class Base : Command
     {
         var client = await GetClient();
         var vm = await client.GetVm(callbackQuery.Data);
-        await VmHelper.ChangeStatusVm(client, vm.Node, vm.VmType, vm.VmId, StatusRequest);
+        await VmHelper.ChangeStatusVm(client, vm.Node, vm.VmType, vm.VmId, StatusToChange);
 
         await botClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
-                                                       $"VM/CT {vm.Id} on node {vm.Node} {StatusRequest}!");
+                                                       $"VM/CT {vm.Id} on node {vm.Node} {StatusToChange}!");
 
         return await Task.FromResult(true);
     }

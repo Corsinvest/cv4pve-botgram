@@ -11,5 +11,6 @@ internal class Shutdown : Base
 {
     public override string Name => "vmshutdown";
     public override string Description => "Shutdown VM/CT";
-    protected override VmStatus StatusRequest => VmStatus.Shutdown;
+    protected override VmStatus StatusToChange => VmStatus.Shutdown;
+    protected override bool StatusVmIsRunning => true;
 }

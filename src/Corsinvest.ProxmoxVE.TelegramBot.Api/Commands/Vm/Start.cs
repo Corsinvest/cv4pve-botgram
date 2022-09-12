@@ -11,5 +11,6 @@ internal class Start : Base
 {
     public override string Name => "vmstart";
     public override string Description => "Start VM/CT";
-    protected override VmStatus StatusRequest => VmStatus.Start;
+    protected override VmStatus StatusToChange => VmStatus.Start;
+    protected override bool StatusVmIsRunning => false;
 }
