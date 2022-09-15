@@ -38,14 +38,14 @@ internal static class BotHelper
         return await botClient.SendDocumentAsync(chatId, new InputOnlineFile(stream, fileName));
     }
 
-    public static List<List<InlineKeyboardButton>> CreateInlineKeyboardButtons(IEnumerable<(string Group, string Text, string CallbackData)> items)
+    public static List<List<InlineKeyboardButton>> CreateInlineKeyboardButtons(IEnumerable<(string group, string text, string callbackData)> items)
     {
         var ikb = new List<List<InlineKeyboardButton>>();
 
-        foreach (var group in items.GroupBy(a => a.Group))
+        foreach (var group in items.GroupBy(a => a.group))
         {
             var rowIKB = new List<InlineKeyboardButton>();
-            foreach (var (_, Text, CallbackData) in group)
+            foreach (var (_, text, callbackData) in group)
             {
                 if (rowIKB.Count > 1)
                 {
@@ -53,7 +53,7 @@ internal static class BotHelper
                     rowIKB = new List<InlineKeyboardButton>();
                 }
 
-                rowIKB.Add(InlineKeyboardButton.WithCallbackData(Text, CallbackData));
+                rowIKB.Add(InlineKeyboardButton.WithCallbackData(text, callbackData));
             }
 
             ikb.Add(rowIKB);
