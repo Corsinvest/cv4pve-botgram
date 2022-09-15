@@ -3,15 +3,15 @@
  * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
  */
 
-using System.IO;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using System.Linq;
 using System.Collections.Generic;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
+using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 
@@ -35,7 +35,7 @@ internal class Alias : Command
     {
         _aliasManager = new ApiExplorerHelper.AliasManager
         {
-            
+
             FileName = Path.Combine(FilesystemHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt")
         };
         _aliasManager.Load();
@@ -90,9 +90,7 @@ internal class Alias : Command
         switch (_requestType)
         {
             case RequestType.Action:
-                await botClient.ChooseInlineKeyboard(message.Chat.Id,
-                                                     "Choose action",
-                                                     new[] { "List", "Delete", "Create" });
+                await botClient.ChooseInlineKeyboard(message.Chat.Id, "Choose action", new[] { "List", "Delete", "Create" });
                 break;
 
             case RequestType.DeleteRequestName:
@@ -102,8 +100,7 @@ internal class Alias : Command
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
-                                                                   $"Name not valid '{message.Text}'");
+                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{message.Text}'");
                 }
                 endCommand = true;
                 break;
@@ -112,8 +109,7 @@ internal class Alias : Command
                 _name = message.Text.Trim();
                 if (_aliasManager.Exists(_name))
                 {
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
-                                                                   $"Name not valid '{_name}'");
+                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{_name}'");
                     endCommand = true;
                 }
                 else
@@ -125,12 +121,15 @@ internal class Alias : Command
 
             case RequestType.CreateRequestDescription:
                 _description = message.Text.Trim();
-                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Description");
+                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command");
                 _requestType = RequestType.CreateRequestCommand;
                 break;
 
             case RequestType.CreateRequestCommand:
                 _aliasManager.Create(_name, _description, message.Text.Trim(), false);
+
+                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command created!");
+                _aliasManager.Save();
                 endCommand = true;
                 break;
 

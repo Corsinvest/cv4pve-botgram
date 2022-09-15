@@ -35,7 +35,7 @@ internal class AliasCommand : Command
             if (!command.StartsWith("/")) { command = "/" + command; }
             var name = command.Trim().Split(' ')[0];
             _commandRef = message.Type == MessageType.Text ?
-                            Command.GetCommand(name) :
+                            GetCommand(name) :
                             null;
 
             message.Text = command;
