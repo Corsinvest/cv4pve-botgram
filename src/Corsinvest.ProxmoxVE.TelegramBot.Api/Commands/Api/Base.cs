@@ -97,19 +97,19 @@ internal abstract class Base : Command
                 _typeRequest = TypeRequest.ArgParameter;
 
                 await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
-                                                               $"Insert value for parmater <b>{parametersArgs[0]}</b>");
+                                                               $"Insert value for parametr <b>{parametersArgs[0]}</b>");
             }
             else if (requestArgs.Length == 0)
             {
                 var pveClient = await GetClient();
                 //execute request
                 var (ResultCode, ResultText) = await ApiExplorerHelper.Execute(pveClient,
-                                                          await PveHelperInt.GetClassApiRoot(pveClient),
-                                                          resource,
-                                                          MethodType,
-                                                          ApiExplorerHelper.CreateParameterResource(parameters),
-                                                          false,
-                                                          TableGenerator.Output.Html);
+                                                                               await PveHelperInt.GetClassApiRoot(pveClient),
+                                                                               resource,
+                                                                               MethodType,
+                                                                               ApiExplorerHelper.CreateParameterResource(parameters),
+                                                                               false,
+                                                                               TableGenerator.Output.Html);
 
                 if (ResultCode != 200)
                 {
@@ -117,7 +117,7 @@ internal abstract class Base : Command
                 }
                 else
                 {
-                    var filename = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resource).Replace("/", "");
+                    var filename = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resource).Replace("/", "-");
                     await botClient.SendDocumentAsyncFromText(message.Chat.Id, ResultText, $"{filename}.html");
                 }
 
@@ -140,7 +140,7 @@ internal abstract class Base : Command
         switch (_typeRequest)
         {
             case TypeRequest.Start:
-                _messageText = "";
+                _messageText = message.Text;
                 var args = ParserExtensions.Parse(new Parser(), _messageText).Tokens.Select(a => a.Value).ToList();
                 if (args.Count > 1) { _messageText = string.Join(" ", args.Skip(1).ToArray()); }
                 break;

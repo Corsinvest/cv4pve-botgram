@@ -92,6 +92,9 @@ public abstract class Command
         if (messageText.Trim().StartsWith("/"))
         {
             var name = messageText.Trim()[1..];
+            var pos = name.IndexOf(" ");
+            if (pos > 0) { name = name[..pos]; }
+
             command = GetCommands().FirstOrDefault(a => a.Names.Contains(name) || name == a.Name);
         }
 
