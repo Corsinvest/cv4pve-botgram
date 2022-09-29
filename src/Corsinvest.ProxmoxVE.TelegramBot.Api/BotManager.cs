@@ -9,6 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Corsinvest.ProxmoxVE.Api;
+using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
@@ -29,6 +31,10 @@ public class BotManager
     private readonly TextWriter _out;
     private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
     private CancellationTokenSource Cts;
+    private Dictionary<long, string> _chats;
+    private static string _pveUsername;
+    private static string _pvePassword;
+    private static string _pveApiToken;
 
     /// <summary>
     /// Constructor
@@ -48,18 +54,40 @@ public class BotManager
                       long[] chatsIdValid,
                       TextWriter @out)
     {
-        PveHelperInt.HostAndPortHA = pveHostAndPortHA;
-        PveHelperInt.ApiToken = pveApiToken;
-        PveHelperInt.Username = pveUsername;
-        PveHelperInt.Password = pvePassword;
-        PveHelperInt.Out = @out;
+        PveHostAndPortHA = pveHostAndPortHA;
+        _pveApiToken = pveApiToken;
+        _pveUsername = pveUsername;
+        _pvePassword = pvePassword;
 
         _chatsIdValid = chatsIdValid;
         _out = @out;
         _lastCommandForChat = new Dictionary<long, (Message, Command)>();
 
+        _chats = new();
+
         //create telegram
         _client = new TelegramBotClient(token);
+    }
+
+    internal static string PveHostAndPortHA { get; set; }
+
+    /// <summary>
+    /// Get client
+    /// </summary>
+    /// <returns></returns>
+    internal static async Task<PveClient> GetPveClient()
+    {
+        var client = ClientHelper.GetClientFromHA(PveHostAndPortHA);
+        if (string.IsNullOrWhiteSpace(_pveApiToken))
+        {
+            await client.Login(_pveUsername, _pvePassword);
+        }
+        else
+        {
+            client.ApiToken = _pveApiToken;
+        }
+
+        return client;
     }
 
     /// <summary>
@@ -81,11 +109,17 @@ public class BotManager
     public async Task SendMessageAsync(long chatId, string message) => await _client.SendTextMessageAsync(chatId, message);
 
     /// <summary>
+    /// Chat info
+    /// </summary>
+    public IReadOnlyDictionary<long,string> Chats => _chats;
+
+    /// <summary>
     /// Start chat
     /// </summary>
     public void StartReceiving()
     {
         Cts = new CancellationTokenSource();
+        _chats = new();
 
         _client.StartReceiving(updateHandler: HandleUpdateAsync,
                                pollingErrorHandler: HandlePollingErrorAsync,
@@ -101,10 +135,10 @@ public class BotManager
         _out.WriteLine($@"Start listening
 Telegram
   Bot User: @{Username}
-  Bot Id: @{BootId}
+  Bot UserId: @{result.Id}
 Proxmox VE
-  Host: {PveHelperInt.HostAndPortHA}
-  Username: {PveHelperInt.Username}");
+  Host: {PveHostAndPortHA}
+  Username: {_pveUsername}");
     }
 
     /// <summary>
@@ -115,6 +149,7 @@ Proxmox VE
         //Send cancellation request to stop bot
         Cts.Cancel();
         Cts = null;
+        _chats = new();
     }
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -129,7 +164,7 @@ Proxmox VE
         }
     }
 
-    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    private async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         var ErrorMessage = exception switch
         {
@@ -138,8 +173,7 @@ Proxmox VE
             _ => exception.ToString()
         };
 
-        Console.WriteLine(ErrorMessage);
-        return Task.CompletedTask;
+        await _out.WriteLineAsync(ErrorMessage);
     }
 
     private async Task ProcessCallbackQuery(CallbackQuery callbackQuery)
@@ -174,6 +208,8 @@ Proxmox VE
     private async Task ProcessMessage(Message message)
     {
         if (message.Text is not { } messageText) { return; }
+
+        _chats.TryAdd(message.Chat.Id, $"{message.Chat.Username} - {message.Chat.LastName} {message.Chat.FirstName}");
 
         var chatId = message.Chat.Id;
         var log = $"{message.Date} - Chat Id: '{chatId}'" +

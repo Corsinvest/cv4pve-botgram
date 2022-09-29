@@ -3,6 +3,7 @@
  * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
  */
 
+using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot.Types;
 
@@ -15,7 +16,7 @@ internal class Start : Help
     public override string Description => "Start";
     protected override string GetText(Message message)
         => $@"Welcome {message.Chat.FirstName}
-You are connect to Proxmox VE {PveHelperInt.HostAndPortHA}
+You are connect to Proxmox VE {BotManager.PveHostAndPortHA}
 
 {base.GetText(message)}
 

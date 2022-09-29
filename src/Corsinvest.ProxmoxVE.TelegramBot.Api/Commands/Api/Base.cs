@@ -75,7 +75,7 @@ internal abstract class Base : Command
                 resource = resource[..(resource.IndexOf(ApiExplorerHelper.CreateArgumentTag(requestArgs[0])) - 1)];
 
                 var pveClient = await GetClient();
-                var (Values, Error) = await ApiExplorerHelper.ListValues(pveClient, await PveHelperInt.GetClassApiRoot(pveClient), resource);
+                var (Values, Error) = await ApiExplorerHelper.ListValues(pveClient, await GetClassApiRoot(pveClient), resource);
                 if (!string.IsNullOrWhiteSpace(Error))
                 {
                     //return error
@@ -104,7 +104,7 @@ internal abstract class Base : Command
                 var pveClient = await GetClient();
                 //execute request
                 var (ResultCode, ResultText) = await ApiExplorerHelper.Execute(pveClient,
-                                                                               await PveHelperInt.GetClassApiRoot(pveClient),
+                                                                               await GetClassApiRoot(pveClient),
                                                                                resource,
                                                                                MethodType,
                                                                                ApiExplorerHelper.CreateParameterResource(parameters),

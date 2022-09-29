@@ -7,9 +7,9 @@
     <Company>Corsinvest Srl</Company>
     <Authors>Daniele Corsini</Authors>
     <Copyright>Corsinvest Srl</Copyright>
-    <Product>Corsinvest for Proxmox VE with Telegram</Product>
-    <AssemblyTitle>Corsinvest for Proxmox VE with Telegram</AssemblyTitle>
-    <Description>Corsinvest for Proxmox VE with Telegram</Description>
+    <Product>Corsinvest for Proxmox VE with Bot Telegram</Product>
+    <AssemblyTitle>Corsinvest for Proxmox VE with Bot Telegram</AssemblyTitle>
+    <Description>Corsinvest for Proxmox VE with Bot Telegram</Description>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PredefinedCulturesOnly>false</PredefinedCulturesOnly>
   </PropertyGroup>

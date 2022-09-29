@@ -36,7 +36,7 @@ internal class Usage : Command
                 break;
 
             case TypeRequest.Resource:
-                var ret = ApiExplorerHelper.Usage(await PveHelperInt.GetClassApiRoot(await GetClient()),
+                var ret = ApiExplorerHelper.Usage(await GetClassApiRoot(await GetClient()),
                                                   message.Text.Trim(),
                                                   TableGenerator.Output.Html,
                                                   true,

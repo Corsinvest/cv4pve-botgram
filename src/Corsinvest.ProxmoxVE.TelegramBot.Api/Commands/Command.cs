@@ -8,7 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Corsinvest.ProxmoxVE.Api.Metadata;
+using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -19,6 +20,8 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 /// </summary>
 public abstract class Command
 {
+    private static ClassApi _classApiRoot;
+
     /// <summary>
     /// Show in Help
     /// </summary>
@@ -42,6 +45,14 @@ public abstract class Command
     /// <returns></returns>
     public List<string> Names { get; } = new List<string>();
 
+    /// <summary>
+    /// Get Class Api Root
+    /// </summary>
+    /// <param name="client"></param>
+    /// <returns></returns>
+    protected static async Task<ClassApi> GetClassApiRoot(PveClient client)
+        => _classApiRoot ??= await GeneratorClassApi.Generate(client.Host, client.Port);
+
     internal static IReadOnlyList<Command> GetCommands()
     {
         var commands = new List<Command>();
@@ -62,7 +73,7 @@ public abstract class Command
     /// Get client
     /// </summary>
     /// <returns></returns>
-    protected static async Task<PveClient> GetClient() => await PveHelperInt.GetClient();
+    protected static async Task<PveClient> GetClient() => await BotManager.GetPveClient();
 
     /// <summary>
     /// Execute
@@ -87,7 +98,7 @@ public abstract class Command
     internal static Command GetCommand(string messageText)
     {
         Command command = null;
-        PveHelperInt.Out.WriteLine("Message: " + messageText);
+        //PveHelperInt.Out.WriteLine("Message: " + messageText);
 
         if (messageText.Trim().StartsWith("/"))
         {
