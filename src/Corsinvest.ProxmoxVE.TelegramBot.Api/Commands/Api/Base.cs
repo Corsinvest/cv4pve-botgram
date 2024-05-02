@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
+using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -36,22 +37,20 @@ internal abstract class Base : Command
     private string _messageText;
     private TypeRequest _typeRequest = TypeRequest.Start;
 
-    public override async Task<bool> Execute(Message message,
-                                             CallbackQuery callbackQuery,
-                                             TelegramBotClient botClient)
+    public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
     {
         if (string.IsNullOrWhiteSpace(_messageText))
         {
-            await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "No command!");
+            await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "No command!");
             await Task.CompletedTask;
         }
 
         ReplaceArg(callbackQuery.Data);
 
-        return await ExecuteOrChoose(message, botClient);
+        return await ExecuteOrChoose(message, botManager);
     }
 
-    private async Task<bool> ExecuteOrChoose(Message message, TelegramBotClient botClient)
+    private async Task<bool> ExecuteOrChoose(Message message, BotManager botManager)
     {
         var endCommand = false;
         var cmdArgs = ParserExtensions.Parse(new Parser(), _messageText).Tokens.Select(a => a.Value).ToList();
@@ -59,7 +58,7 @@ internal abstract class Base : Command
         {
             //request resource
             _typeRequest = TypeRequest.Resource;
-            await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, DEFAULT_MSG);
+            await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, DEFAULT_MSG);
         }
         else
         {
@@ -74,19 +73,19 @@ internal abstract class Base : Command
                 //fix request
                 resource = resource[..(resource.IndexOf(ApiExplorerHelper.CreateArgumentTag(requestArgs[0])) - 1)];
 
-                var pveClient = await GetClient();
-                var (Values, Error) = await ApiExplorerHelper.ListValues(pveClient, await GetClassApiRoot(pveClient), resource);
+                var pveClient = await botManager.GetPveClientAsync();
+                var (Values, Error) = await ApiExplorerHelper.ListValuesAsync(pveClient, await GetClassApiRoot(pveClient), resource);
                 if (!string.IsNullOrWhiteSpace(Error))
                 {
                     //return error
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, Error);
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, Error);
                     endCommand = true;
                 }
                 else
                 {
                     _typeRequest = TypeRequest.ArgResource;
 
-                    await botClient.ChooseInlineKeyboard(message.Chat.Id,
+                    await botManager.BotClient.ChooseInlineKeyboard(message.Chat.Id,
                                                          $"Choose {requestArgs[0]}",
                                                          Values.Select(a => ("", a.Value, a.Value)));
                 }
@@ -96,29 +95,29 @@ internal abstract class Base : Command
                 //request parameter value
                 _typeRequest = TypeRequest.ArgParameter;
 
-                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
-                                                               $"Insert value for parametr <b>{parametersArgs[0]}</b>");
+                await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
+                                                                          $"Insert value for parametr <b>{parametersArgs[0]}</b>");
             }
             else if (requestArgs.Length == 0)
             {
-                var pveClient = await GetClient();
+                var pveClient = await botManager.GetPveClientAsync();
                 //execute request
-                var (ResultCode, ResultText) = await ApiExplorerHelper.Execute(pveClient,
-                                                                               await GetClassApiRoot(pveClient),
-                                                                               resource,
-                                                                               MethodType,
-                                                                               ApiExplorerHelper.CreateParameterResource(parameters),
-                                                                               false,
-                                                                               TableGenerator.Output.Html);
+                var (ResultCode, ResultText) = await ApiExplorerHelper.ExecuteAsync(pveClient,
+                                                                                    await GetClassApiRoot(pveClient),
+                                                                                    resource,
+                                                                                    MethodType,
+                                                                                    ApiExplorerHelper.CreateParameterResource(parameters),
+                                                                                    false,
+                                                                                    TableGenerator.Output.Html);
 
                 if (ResultCode != 200)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ResultText}");
+                    await botManager.BotClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ResultText}");
                 }
                 else
                 {
                     var filename = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resource).Replace("/", "-");
-                    await botClient.SendDocumentAsyncFromText(message.Chat.Id, ResultText, $"{filename}.html");
+                    await botManager.BotClient.SendDocumentAsyncFromText(message.Chat.Id, ResultText, $"{filename}.html");
                 }
 
                 endCommand = true;
@@ -127,7 +126,7 @@ internal abstract class Base : Command
 
         if (endCommand) { _messageText = ""; }
 
-        return await Task.FromResult(endCommand);
+        return endCommand;
     }
 
     private void ReplaceArg(string value)
@@ -135,7 +134,7 @@ internal abstract class Base : Command
                             ApiExplorerHelper.CreateArgumentTag(ApiExplorerHelper.GetArgumentTags(_messageText)[0]),
                             value);
 
-    public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
+    public override async Task<bool> Execute(Message message, BotManager botManager)
     {
         switch (_typeRequest)
         {
@@ -150,6 +149,6 @@ internal abstract class Base : Command
             default: break;
         }
 
-        return await ExecuteOrChoose(message, botClient);
+        return await ExecuteOrChoose(message, botManager);
     }
 }

@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
+using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
@@ -35,8 +35,7 @@ internal class Alias : Command
     {
         _aliasManager = new ApiExplorerHelper.AliasManager
         {
-
-            FileName = Path.Combine(FilesystemHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt")
+            FileName = Path.Combine(CommonHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt")
         };
         _aliasManager.Load();
     }
@@ -44,9 +43,7 @@ internal class Alias : Command
     public override string Name => "alias";
     public override string Description => "Create alias commands";
 
-    public override async Task<bool> Execute(Message message,
-                                             CallbackQuery callbackQuery,
-                                             TelegramBotClient botClient)
+    public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
     {
         var endCommand = false;
         switch (_requestType)
@@ -55,22 +52,22 @@ internal class Alias : Command
                 switch (callbackQuery.Data)
                 {
                     case "List":
-                        await botClient.SendDocumentAsyncFromText(message.Chat.Id,
-                                                                  _aliasManager.ToTable(true, TableGenerator.Output.Html),
-                                                                  "alias.html");
+                        await botManager.BotClient.SendDocumentAsyncFromText(message.Chat.Id,
+                                                                            _aliasManager.ToTable(true, TableGenerator.Output.Html),
+                                                                            "alias.html");
                         endCommand = true;
                         break;
 
                     case "Delete":
                         //request name
                         _requestType = RequestType.DeleteRequestName;
-                        await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Name alias");
+                        await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Name alias");
                         break;
 
                     case "Create":
                         //request name
                         _requestType = RequestType.CreateRequestName;
-                        await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Name alias");
+                        await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Name alias");
                         break;
 
                     default: break;
@@ -80,17 +77,16 @@ internal class Alias : Command
             default: break;
         }
 
-        return await Task.FromResult(endCommand);
+        return endCommand;
     }
 
-    public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
+    public override async Task<bool> Execute(Message message, BotManager botManager)
     {
         var endCommand = false;
-
         switch (_requestType)
         {
             case RequestType.Action:
-                await botClient.ChooseInlineKeyboard(message.Chat.Id, "Choose action", new[] { "List", "Delete", "Create" });
+                await botManager.BotClient.ChooseInlineKeyboard(message.Chat.Id, "Choose action", new[] { "List", "Delete", "Create" });
                 break;
 
             case RequestType.DeleteRequestName:
@@ -100,7 +96,7 @@ internal class Alias : Command
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{message.Text}'");
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{message.Text}'");
                 }
                 endCommand = true;
                 break;
@@ -109,26 +105,25 @@ internal class Alias : Command
                 _name = message.Text.Trim();
                 if (_aliasManager.Exists(_name))
                 {
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{_name}'");
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{_name}'");
                     endCommand = true;
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Description");
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Description");
                     _requestType = RequestType.CreateRequestDescription;
                 }
                 break;
 
             case RequestType.CreateRequestDescription:
                 _description = message.Text.Trim();
-                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command");
+                await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command");
                 _requestType = RequestType.CreateRequestCommand;
                 break;
 
             case RequestType.CreateRequestCommand:
                 _aliasManager.Create(_name, _description, message.Text.Trim(), false);
-
-                await botClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command created!");
+                await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command created!");
                 _aliasManager.Save();
                 endCommand = true;
                 break;
@@ -136,7 +131,7 @@ internal class Alias : Command
             default: break;
         }
 
-        return await Task.FromResult(endCommand);
+        return endCommand;
     }
 
     public IReadOnlyList<AliasCommand> GetCommandsFromAlias()

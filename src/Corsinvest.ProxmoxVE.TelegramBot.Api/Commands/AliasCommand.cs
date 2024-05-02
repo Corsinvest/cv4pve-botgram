@@ -5,7 +5,7 @@
 
 using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
-using Telegram.Bot;
+using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -26,7 +26,7 @@ internal class AliasCommand : Command
     public override string Description => _aliasDef.Description;
     public override bool ShowInHelp => false;
 
-    public override async Task<bool> Execute(Message message, TelegramBotClient botClient)
+    public override async Task<bool> Execute(Message message, BotManager botManager)
     {
         if (_commandRef == null)
         {
@@ -41,13 +41,11 @@ internal class AliasCommand : Command
             message.Text = command;
         }
 
-        if (_commandRef == null) { return await Task.FromResult(true); }
+        if (_commandRef == null) { return true; }
 
-        return await _commandRef.Execute(message, botClient);
+        return await _commandRef.Execute(message, botManager);
     }
 
-    public override async Task<bool> Execute(Message message,
-                                             CallbackQuery callbackQuery,
-                                             TelegramBotClient botClient)
-        => await _commandRef.Execute(message, callbackQuery, botClient);
+    public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
+        => await _commandRef.Execute(message, callbackQuery, botManager);
 }

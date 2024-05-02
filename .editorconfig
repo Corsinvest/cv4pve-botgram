@@ -1,7 +1,0 @@
-﻿# All files
-[*]
-guidelines = 80
-
-# C# or VB files
-[*.{cs,vb}]
-guidelines = 80, 120

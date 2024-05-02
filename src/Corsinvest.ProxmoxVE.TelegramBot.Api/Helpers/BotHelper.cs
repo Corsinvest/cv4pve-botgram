@@ -50,7 +50,7 @@ internal static class BotHelper
                 if (rowIKB.Count > 1)
                 {
                     ikb.Add(rowIKB);
-                    rowIKB = new List<InlineKeyboardButton>();
+                    rowIKB = [];
                 }
 
                 rowIKB.Add(InlineKeyboardButton.WithCallbackData(text, callbackData));
@@ -85,7 +85,7 @@ internal static class BotHelper
                                                     PveClient pveClient,
                                                     bool isRunning)
     {
-        var resources = await pveClient.GetResources(ClusterResourceType.All);
+        var resources = await pveClient.GetResourcesAsync(ClusterResourceType.All);
 
         var nodes = resources.Where(a => a.ResourceType == ClusterResourceType.Node
                                     && a.IsOnline).Select(a => a.Node);
@@ -104,7 +104,7 @@ internal static class BotHelper
                                                       PveClient pveClient,
                                                       bool isOnline)
     {
-        var items = (await pveClient.GetNodes())
+        var items = (await pveClient.GetNodesAsync())
                         .Where(a => a.IsOnline == isOnline)
                         .Select(a => ("", a.Node, a.Node));
 

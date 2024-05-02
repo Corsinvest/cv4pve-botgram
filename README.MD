@@ -1,38 +1,35 @@
 # cv4pve-botgram
 
-[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-botgram.svg)](LICENSE.md) [![AppVeyor branch](https://img.shields.io/appveyor/ci/franklupo/cv4pve-botgram/master.svg)](https://ci.appveyor.com/project/franklupo/cv4pve-botgram)
+[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-botgram.svg)](LICENSE.md)
 
 [ProxmoxVE Api](https://pve.proxmox.com/pve-docs/api-viewer/)
 
 ```text
-    ______                _                      __
-   / ____/___  __________(_)___ _   _____  _____/ /_
-  / /   / __ \/ ___/ ___/ / __ \ | / / _ \/ ___/ __/
- / /___/ /_/ / /  (__  ) / / / / |/ /  __(__  ) /_
- \____/\____/_/  /____/_/_/ /_/|___/\___/____/\__/
+     ______                _                      __
+    / ____/___  __________(_)___ _   _____  _____/ /_
+   / /   / __ \/ ___/ ___/ / __ \ | / / _ \/ ___/ __/
+  / /___/ /_/ / /  (__  ) / / / / |/ /  __(__  ) /_
+  \____/\____/_/  /____/_/_/ /_/|___/\___/____/\__/
 
-Telegram bot for Proxmox VE         (Made in Italy)
 
-Usage: cv4pve-botgram [options]
+  Telegram bot for Proxmox VE                    (Made in Italy)
+
+  cv4pve-botgram is a part of suite cv4pve.
+  For more information visit https://www.corsinvest.it/cv4pve
+
+Usage:
+  cv4pve-botgram [options]
 
 Options:
-  -?|-h|--help      Show help information
-  --version         Show version information
-  --host            The host name host[:port],host1[:port],host2[:port]
-  --api-token       Api token format 'USER@REALM!TOKENID=UUID'. Require Proxmox VE 6.2 or later
-  --username        User name <username>@<realm>
-  --password        The password. Specify 'file:path_file' to store password in file.
-  --token           Telegram API token bot
-  --chatsId         Telegram Chats Id valid for communication (comma separated)
-
-Commands:
-  app-check-update  Check update application
-  app-upgrade       Upgrade application
-
-Run 'cv4pve-botgram [command] --help' for more information about a command.
-
-cv4pve-botgram is a part of suite cv4pve-tools.
-For more information visit https://www.cv4pve-tools.com
+  --api-token <api-token>     Api token format 'USER@REALM!TOKENID=UUID'. Require Proxmox VE 6.2 or later
+  --username <username>       User name <username>@<realm>
+  --password <password>       The password. Specify 'file:path_file' to store password in file.
+  --validate-certificate      Validate SSL Certificate Proxmox VE node.
+  --host <host> (REQUIRED)    The host name host[:port],host1[:port],host2[:port]
+  --token <token> (REQUIRED)  Telegram API token bot
+  --chatsId <chatsId>         Telegram Chats Id valid for communication (comma separated)
+  --version                   Show version information
+  -?, -h, --help              Show help and usage information
 ```
 
 ## Copyright and License
@@ -71,6 +68,7 @@ this software aims to simplify the management of Proxmox VE single node or clust
 * Complex output to document in chat
 * Valid ChatsId for communication
 * Use Api token --api-token parameter
+* Validate certificate SSL, default not validate
 
 ## Api token
 

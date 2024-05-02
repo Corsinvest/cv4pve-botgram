@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Metadata;
 using Corsinvest.ProxmoxVE.TelegramBot.Api;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
@@ -43,7 +42,7 @@ public abstract class Command
     /// Names alias
     /// </summary>
     /// <returns></returns>
-    public List<string> Names { get; } = new List<string>();
+    public List<string> Names { get; } = [];
 
     /// <summary>
     /// Get Class Api Root
@@ -51,18 +50,17 @@ public abstract class Command
     /// <param name="client"></param>
     /// <returns></returns>
     protected static async Task<ClassApi> GetClassApiRoot(PveClient client)
-        => _classApiRoot ??= await GeneratorClassApi.Generate(client.Host, client.Port);
+        => _classApiRoot ??= await GeneratorClassApi.GenerateAsync(client.Host, client.Port);
 
     internal static IReadOnlyList<Command> GetCommands()
     {
-        var commands = new List<Command>();
-        commands.AddRange(typeof(Command).Assembly
-                                .GetTypes()
-                                .Where(a => !a.IsAbstract &&
-                                            a.IsSubclassOf(typeof(Command)) &&
-                                            !a.IsAssignableFrom(typeof(AliasCommand)))
-                                .Select(a => (Command)Activator.CreateInstance(a))
-                                .ToList());
+        var commands = typeof(Command).Assembly
+                                      .GetTypes()
+                                      .Where(a => !a.IsAbstract &&
+                                                  a.IsSubclassOf(typeof(Command)) &&
+                                                  !a.IsAssignableFrom(typeof(AliasCommand)))
+                                      .Select(a => (Command)Activator.CreateInstance(a))
+                                      .ToList();
 
         commands.AddRange(new Alias().GetCommandsFromAlias());
 
@@ -70,35 +68,26 @@ public abstract class Command
     }
 
     /// <summary>
-    /// Get client
-    /// </summary>
-    /// <returns></returns>
-    protected static async Task<PveClient> GetClient() => await BotManager.GetPveClient();
-
-    /// <summary>
     /// Execute
     /// </summary>
     /// <param name="message"></param>
-    /// <param name="botClient"></param>
+    /// <param name="botManager"></param>
     /// <returns></returns>
-    public abstract Task<bool> Execute(Message message, TelegramBotClient botClient);
+    public abstract Task<bool> Execute(Message message, BotManager botManager);
 
     /// <summary>
     /// Execute
     /// </summary>
     /// <param name="message"></param>
     /// <param name="callbackQuery"></param>
-    /// <param name="botClient"></param>
+    /// <param name="botManager"></param>
     /// <returns></returns>
-    public virtual async Task<bool> Execute(Message message,
-                                            CallbackQuery callbackQuery,
-                                            TelegramBotClient botClient)
+    public virtual async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
         => await Task.FromResult(true);
 
     internal static Command GetCommand(string messageText)
     {
         Command command = null;
-        //PveHelperInt.Out.WriteLine("Message: " + messageText);
 
         if (messageText.Trim().StartsWith("/"))
         {

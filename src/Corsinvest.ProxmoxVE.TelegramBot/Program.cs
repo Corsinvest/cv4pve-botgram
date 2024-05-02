@@ -6,48 +6,49 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
 using Corsinvest.ProxmoxVE.TelegramBot.Api;
+using Microsoft.Extensions.Logging;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot;
+var app = ConsoleHelper.CreateApp("cv4pve-botgram", "Telegram bot for Proxmox VE");
+var loggerFactory = ConsoleHelper.CreateLoggerFactory<Program>(app.GetLogLevelFromDebug());
 
-class Program
+var optChatToken = app.AddOption<string>("--token", "Telegram API token bot");
+optChatToken.IsRequired = true;
+
+var optChatsId = app.AddOption<string>("--chatsId", "Telegram Chats Id valid for communication (comma separated)");
+
+app.SetHandler((host, apiToken, username, validateCertificate, chatToken, chatsId) =>
 {
-    static async Task Main(string[] args)
+    var chatIds = new List<long>();
+    foreach (var chatId in (chatsId + "").Split(","))
     {
-        var app = ConsoleHelper.CreateApp("cv4pve-botgram", "Telegram bot for Proxmox VE");
-
-        var optToken = app.AddOption("--token", "Telegram API token bot");
-        optToken.IsRequired = true;
-
-        var optChatsId = app.AddOption("--chatsId", "Telegram Chats Id valid for communication (comma separated)");
-
-        app.SetHandler(() =>
-        {
-            var chatsId = new List<long>();
-            foreach (var chatId in (optChatsId.GetValue() + "").Split(","))
-            {
-                if (long.TryParse(chatId, out var id)) { chatsId.Add(id); }
-            }
-
-            var botManager = new BotManager(app.GetHost().GetValue(),
-                                            app.GetApiToken().GetValue(),
-                                            app.GetUsername().GetValue(),
-                                            app.GetPasswordFromOption(),
-                                            optToken.GetValue(),
-                                            chatsId.ToArray(),
-                                            Console.Out);
-            botManager.StartReceiving();
-
-            Console.ReadLine();
-
-            try { botManager.StopReceiving(); }
-            catch { }
-
-            Console.Out.WriteLine("End application");
-        });
-
-        await app.ExecuteApp(args);
+        if (long.TryParse(chatId, out var id)) { chatIds.Add(id); }
     }
-}
+
+    var botManager = new BotManager(host,
+                                    apiToken,
+                                    username,
+                                    app.GetPasswordFromOption(),
+                                    validateCertificate,
+                                    loggerFactory,
+                                    chatToken,
+                                    chatIds.ToArray(),
+                                    Console.Out);
+    botManager.StartReceiving();
+
+    Console.ReadLine();
+
+    try { botManager.StopReceiving(); }
+    catch { }
+
+    Console.Out.WriteLine("End application");
+},
+ app.GetHostOption(),
+ app.GetApiTokenOption(),
+ app.GetUsernameOption(),
+ app.GetValidateCertificateOption(),
+ optChatToken,
+ optChatsId);
+
+return await app.ExecuteAppAsync(args, loggerFactory.CreateLogger(typeof(Program)));

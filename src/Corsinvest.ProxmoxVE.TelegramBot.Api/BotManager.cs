@@ -13,6 +13,7 @@ using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
 using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -26,15 +27,17 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api;
 /// </summary>
 public class BotManager
 {
-    private readonly TelegramBotClient _client;
     private readonly long[] _chatsIdValid;
     private readonly TextWriter _out;
     private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
     private CancellationTokenSource Cts;
     private Dictionary<long, string> _chats;
-    private static string _pveUsername;
-    private static string _pvePassword;
-    private static string _pveApiToken;
+    private readonly string _pveUsername;
+    private readonly string _pvePassword;
+    private readonly bool _pveValidateCertificate;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly string _pveApiToken;
+    internal TelegramBotClient BotClient { get; private set; }
 
     /// <summary>
     /// Constructor
@@ -43,6 +46,8 @@ public class BotManager
     /// <param name="pveApiToken">Proxmox VE Api Token</param>
     /// <param name="pveUsername">Proxmox VE username</param>
     /// <param name="pvePassword">Proxmox VE password</param>
+    /// <param name="pveValidateCertificate"></param>
+    /// <param name="loggerFactory"></param>
     /// <param name="token">Token Telegram Bot</param>
     /// <param name="chatsIdValid">Valid chats Id</param>
     /// <param name="out">Output write</param>
@@ -50,6 +55,8 @@ public class BotManager
                       string pveApiToken,
                       string pveUsername,
                       string pvePassword,
+                      bool pveValidateCertificate,
+                      ILoggerFactory loggerFactory,
                       string token,
                       long[] chatsIdValid,
                       TextWriter @out)
@@ -58,42 +65,36 @@ public class BotManager
         _pveApiToken = pveApiToken;
         _pveUsername = pveUsername;
         _pvePassword = pvePassword;
+        _pveValidateCertificate = pveValidateCertificate;
+        _loggerFactory = loggerFactory;
 
         _chatsIdValid = chatsIdValid;
         _out = @out;
-        _lastCommandForChat = new Dictionary<long, (Message, Command)>();
-
-        _chats = new();
+        _lastCommandForChat = [];
+        _chats = [];
 
         //create telegram
-        _client = new TelegramBotClient(token);
+        BotClient = new TelegramBotClient(token);
     }
 
-    internal static string PveHostAndPortHA { get; set; }
+    internal string PveHostAndPortHA { get; set; }
 
     /// <summary>
     /// Get client
     /// </summary>
     /// <returns></returns>
-    internal static async Task<PveClient> GetPveClient()
-    {
-        var client = ClientHelper.GetClientFromHA(PveHostAndPortHA);
-        if (string.IsNullOrWhiteSpace(_pveApiToken))
-        {
-            await client.Login(_pveUsername, _pvePassword);
-        }
-        else
-        {
-            client.ApiToken = _pveApiToken;
-        }
-
-        return client;
-    }
+    internal async Task<PveClient> GetPveClientAsync()
+        => await ClientHelper.GetClientAndTryLoginAsync(PveHostAndPortHA,
+                                                        _pveUsername,
+                                                        _pvePassword,
+                                                        _pveApiToken,
+                                                        _pveValidateCertificate,
+                                                       _loggerFactory);
 
     /// <summary>
     /// Bot Id
     /// </summary>
-    public long? BootId => _client.BotId;
+    public long? BootId => BotClient.BotId;
 
     /// <summary>
     /// Chat username
@@ -106,12 +107,12 @@ public class BotManager
     /// </summary>
     /// <param name="chatId"></param>
     /// <param name="message"></param>
-    public async Task SendMessageAsync(long chatId, string message) => await _client.SendTextMessageAsync(chatId, message);
+    public async Task SendMessageAsync(long chatId, string message) => await BotClient.SendTextMessageAsync(chatId, message);
 
     /// <summary>
     /// Chat info
     /// </summary>
-    public IReadOnlyDictionary<long,string> Chats => _chats;
+    public IReadOnlyDictionary<long, string> Chats => _chats;
 
     /// <summary>
     /// Start chat
@@ -119,9 +120,9 @@ public class BotManager
     public void StartReceiving()
     {
         Cts = new CancellationTokenSource();
-        _chats = new();
+        _chats = [];
 
-        _client.StartReceiving(updateHandler: HandleUpdateAsync,
+        BotClient.StartReceiving(updateHandler: HandleUpdateAsync,
                                pollingErrorHandler: HandlePollingErrorAsync,
                                receiverOptions: new ReceiverOptions
                                {
@@ -129,7 +130,7 @@ public class BotManager
                                },
                                cancellationToken: Cts.Token);
 
-        var result = _client.GetMeAsync().Result;
+        var result = BotClient.GetMeAsync().Result;
         Username = result.Username;
 
         _out.WriteLine($@"Start listening
@@ -149,7 +150,7 @@ Proxmox VE
         //Send cancellation request to stop bot
         Cts.Cancel();
         Cts = null;
-        _chats = new();
+        _chats = [];
     }
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -181,13 +182,13 @@ Proxmox VE
         await _out.WriteLineAsync($"OnCallbackQuery: {callbackQuery.Data}");
 
         var chatId = callbackQuery.Message.Chat.Id;
-        await _client.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
+        await BotClient.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
 
         try
         {
             if (_lastCommandForChat.TryGetValue(chatId, out var value))
             {
-                if (await value.Command.Execute(value.Message, callbackQuery, _client))
+                if (await value.Command.Execute(value.Message, callbackQuery, this))
                 {
                     _lastCommandForChat.Remove(chatId);
                 }
@@ -195,13 +196,13 @@ Proxmox VE
             else
             {
                 _lastCommandForChat.Remove(chatId);
-                await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Data not recognized '{callbackQuery.Data}'");
+                await BotClient.SendTextMessageAsyncNoKeyboard(chatId, $"Data not recognized '{callbackQuery.Data}'");
             }
         }
         catch (Exception ex)
         {
             await _out.WriteLineAsync(ex.StackTrace);
-            await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error CallbackQuery! {ex.Message}");
+            await BotClient.SendTextMessageAsyncNoKeyboard(chatId, $"Error CallbackQuery! {ex.Message}");
         }
     }
 
@@ -216,14 +217,14 @@ Proxmox VE
                   $" User: '{message.Chat.Username}'" +
                   $" - '{message.Chat.FirstName} {message.Chat.LastName}'" +
                   $" Msg Type: '{message.Type}'";
-        if (message.Type == MessageType.Text) { log += $"=> '{message.Text}'"; }
+        if (message.Type == MessageType.Text) { log += $" => '{message.Text}'"; }
         await _out.WriteLineAsync(log);
 
         //check security Chat
         if (_chatsIdValid.Any() && !_chatsIdValid.Contains(chatId))
         {
             await _out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{message.Chat.Username}' not permitted access!");
-            await _client.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
+            await BotClient.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
             return;
         }
 
@@ -241,7 +242,7 @@ Proxmox VE
 
         try
         {
-            if (await command.Execute(message, _client))
+            if (await command.Execute(message, this))
             {
                 _lastCommandForChat.Remove(chatId);
             }
@@ -250,7 +251,7 @@ Proxmox VE
         {
             _lastCommandForChat.Remove(chatId);
             await _out.WriteLineAsync(ex.StackTrace);
-            await _client.SendTextMessageAsyncNoKeyboard(chatId, $"Error execute command! {ex.Message}");
+            await BotClient.SendTextMessageAsyncNoKeyboard(chatId, $"Error execute command! {ex.Message}");
         }
     }
 }
