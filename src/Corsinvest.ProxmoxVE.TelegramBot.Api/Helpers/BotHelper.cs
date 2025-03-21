@@ -14,7 +14,6 @@ using Corsinvest.ProxmoxVE.Api.Shared.Models.Cluster;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
@@ -24,9 +23,9 @@ internal static class BotHelper
     public static async Task<Message> SendTextMessageAsyncNoKeyboard(this TelegramBotClient botClient,
                                                                      long chatId,
                                                                      string text)
-        => await botClient.SendTextMessageAsync(chatId,
-                                                text,
-                                                ParseMode.Html,
+        => await botClient.SendMessage(chatId: chatId,
+                                       text: text,
+                                       parseMode: ParseMode.Html,
                                                 replyMarkup: new ReplyKeyboardRemove());
 
     public static async Task<Message> SendDocumentAsyncFromText(this TelegramBotClient botClient,
@@ -34,8 +33,9 @@ internal static class BotHelper
                                                                 string text,
                                                                 string fileName)
     {
+
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
-        return await botClient.SendDocumentAsync(chatId, new InputOnlineFile(stream, fileName));
+        return await botClient.SendDocument(chatId, InputFile.FromStream(stream, fileName));
     }
 
     public static List<List<InlineKeyboardButton>> CreateInlineKeyboardButtons(IEnumerable<(string group, string text, string callbackData)> items)
@@ -73,11 +73,11 @@ internal static class BotHelper
                                                   string title,
                                                   IEnumerable<(string Group, string Text, string CallbackData)> items)
     {
-        await botClient.SendChatActionAsync(chatId, ChatAction.Typing);
+        await botClient.SendChatAction(chatId, ChatAction.Typing);
 
-        await botClient.SendTextMessageAsync(chatId,
-                                             title,
-                                             replyMarkup: new InlineKeyboardMarkup(CreateInlineKeyboardButtons(items)));
+        await botClient.SendMessage(chatId,
+                                    title,
+                                    replyMarkup: new InlineKeyboardMarkup(CreateInlineKeyboardButtons(items)));
     }
 
     public static async Task ChooseVmInlineKeyboard(this TelegramBotClient botClient,

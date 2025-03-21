@@ -107,7 +107,7 @@ public class BotManager
     /// </summary>
     /// <param name="chatId"></param>
     /// <param name="message"></param>
-    public async Task SendMessageAsync(long chatId, string message) => await BotClient.SendTextMessageAsync(chatId, message);
+    public async Task SendMessageAsync(long chatId, string message) => await BotClient.SendMessage(chatId, message);
 
     /// <summary>
     /// Chat info
@@ -122,15 +122,16 @@ public class BotManager
         Cts = new CancellationTokenSource();
         _chats = [];
 
-        BotClient.StartReceiving(updateHandler: HandleUpdateAsync,
-                               pollingErrorHandler: HandlePollingErrorAsync,
-                               receiverOptions: new ReceiverOptions
-                               {
-                                   AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
-                               },
-                               cancellationToken: Cts.Token);
 
-        var result = BotClient.GetMeAsync().Result;
+        BotClient.StartReceiving(updateHandler: HandleUpdateAsync,
+                                 errorHandler: HandlePollingErrorAsync,
+                                 receiverOptions: new ReceiverOptions
+                                 {
+                                     AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+                                 },
+                                 cancellationToken: Cts.Token);
+
+        var result = BotClient.GetMe().Result;
         Username = result.Username;
 
         _out.WriteLine($@"Start listening
@@ -182,7 +183,7 @@ Proxmox VE
         await _out.WriteLineAsync($"OnCallbackQuery: {callbackQuery.Data}");
 
         var chatId = callbackQuery.Message.Chat.Id;
-        await BotClient.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
+        await BotClient.DeleteMessage(chatId, callbackQuery.Message.MessageId);
 
         try
         {
@@ -224,7 +225,7 @@ Proxmox VE
         if (_chatsIdValid.Any() && !_chatsIdValid.Contains(chatId))
         {
             await _out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{message.Chat.Username}' not permitted access!");
-            await BotClient.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
+            await BotClient.SendMessage(chatId, "You not have permission in this Chat!");
             return;
         }
 

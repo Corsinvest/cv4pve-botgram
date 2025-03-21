@@ -33,8 +33,8 @@
     <!-- <ProjectReference
     Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Extension\Corsinvest.ProxmoxVE.Api.Extension.csproj"
     /> -->
-    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.2.0" />
-    <PackageReference Include="Telegram.Bot" Version="18.0.0" />
+    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.3.2" />
+    <PackageReference Include="Telegram.Bot" Version="22.4.4" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 

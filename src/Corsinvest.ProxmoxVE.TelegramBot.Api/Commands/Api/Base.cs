@@ -112,7 +112,7 @@ internal abstract class Base : Command
 
                 if (ResultCode != 200)
                 {
-                    await botManager.BotClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ResultText}");
+                    await botManager.BotClient.SendMessage(message.Chat.Id, $"Error: {ResultText}");
                 }
                 else
                 {
