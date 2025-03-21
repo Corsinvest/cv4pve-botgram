@@ -1,16 +1,12 @@
 ﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.TelegramBot.Api;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
 
 internal class Help : Command
 {

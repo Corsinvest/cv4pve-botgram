@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // Se i framework di destinazione sono stati modificati, assicurarsi di aggiornare il percorso del programma.
-            "program": "${workspaceFolder}/src/Corsinvest.ProxmoxVE.TelegramBot/bin/Debug/net8.0/cv4pve-botgram.dll",
+            "program": "${workspaceFolder}/src/Corsinvest.ProxmoxVE.TelegramBot/bin/Debug/net9.0/cv4pve-botgram.dll",
             "args": [
                 "@Parm.parm"
             ],

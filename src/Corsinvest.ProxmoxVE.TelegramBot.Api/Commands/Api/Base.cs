@@ -1,22 +1,18 @@
 ﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using System;
 using System.CommandLine.Parsing;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
-using Corsinvest.ProxmoxVE.TelegramBot.Api;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api.Api;
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands.Api;
 
 internal abstract class Base : Command
 {
@@ -53,7 +49,7 @@ internal abstract class Base : Command
     private async Task<bool> ExecuteOrChoose(Message message, BotManager botManager)
     {
         var endCommand = false;
-        var cmdArgs = ParserExtensions.Parse(new Parser(), _messageText).Tokens.Select(a => a.Value).ToList();
+        var cmdArgs = new Parser().Parse(_messageText).Tokens.Select(a => a.Value).ToList();
         if (cmdArgs.Count == 0)
         {
             //request resource
@@ -63,7 +59,7 @@ internal abstract class Base : Command
         else
         {
             var resource = cmdArgs[0];
-            if (!resource.StartsWith("/")) { resource = "/" + resource; }
+            if (!resource.StartsWith('/')) { resource = "/" + resource; }
             var requestArgs = ApiExplorerHelper.GetArgumentTags(resource);
             var parameters = cmdArgs.Skip(1).ToArray();
             var parametersArgs = parameters.SelectMany(a => ApiExplorerHelper.GetArgumentTags(a)).ToList();
@@ -112,7 +108,7 @@ internal abstract class Base : Command
 
                 if (ResultCode != 200)
                 {
-                    await botManager.BotClient.SendMessage(message.Chat.Id, $"Error: {ResultText}");
+                    await botManager.BotClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ResultText}");
                 }
                 else
                 {
@@ -140,8 +136,8 @@ internal abstract class Base : Command
         {
             case TypeRequest.Start:
                 _messageText = message.Text;
-                var args = ParserExtensions.Parse(new Parser(), _messageText).Tokens.Select(a => a.Value).ToList();
-                if (args.Count > 1) { _messageText = string.Join(" ", args.Skip(1).ToArray()); }
+                var args = new Parser().Parse(_messageText).Tokens.Select(a => a.Value).ToList();
+                if (args.Count > 1) { _messageText = string.Join(" ", [.. args.Skip(1)]); }
                 break;
 
             case TypeRequest.Resource: _messageText = message.Text; break;

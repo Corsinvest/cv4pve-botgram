@@ -1,10 +1,8 @@
 ﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using Corsinvest.ProxmoxVE.Api.Shell.Helpers;
 using Corsinvest.ProxmoxVE.TelegramBot.Api;
@@ -33,7 +31,7 @@ app.SetHandler((host, apiToken, username, validateCertificate, chatToken, chatsI
                                     validateCertificate,
                                     loggerFactory,
                                     chatToken,
-                                    chatIds.ToArray(),
+                                    [.. chatIds],
                                     Console.Out);
     botManager.StartReceiving();
 

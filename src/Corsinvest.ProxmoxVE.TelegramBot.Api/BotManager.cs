@@ -1,18 +1,12 @@
 ﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
-using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
+using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -25,59 +19,34 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api;
 /// <summary>
 /// Bot Manager
 /// </summary>
-public class BotManager
+/// <remarks>
+/// Constructor
+/// </remarks>
+/// <param name="pveHostAndPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
+/// <param name="pveApiToken">Proxmox VE Api Token</param>
+/// <param name="pveUsername">Proxmox VE username</param>
+/// <param name="pvePassword">Proxmox VE password</param>
+/// <param name="pveValidateCertificate"></param>
+/// <param name="loggerFactory"></param>
+/// <param name="token">Token Telegram Bot</param>
+/// <param name="chatsIdValid">Valid chats Id</param>
+/// <param name="out">Output write</param>
+public class BotManager(string pveHostAndPortHA,
+                        string pveApiToken,
+                        string pveUsername,
+                        string pvePassword,
+                        bool pveValidateCertificate,
+                        ILoggerFactory loggerFactory,
+                        string token,
+                        long[] chatsIdValid,
+                        TextWriter @out)
 {
-    private readonly long[] _chatsIdValid;
-    private readonly TextWriter _out;
-    private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat;
+    private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat = [];
     private CancellationTokenSource Cts;
-    private Dictionary<long, string> _chats;
-    private readonly string _pveUsername;
-    private readonly string _pvePassword;
-    private readonly bool _pveValidateCertificate;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly string _pveApiToken;
-    internal TelegramBotClient BotClient { get; private set; }
+    private Dictionary<long, string> _chats = [];
+    internal TelegramBotClient BotClient { get; private set; } = new TelegramBotClient(token);
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="pveHostAndPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
-    /// <param name="pveApiToken">Proxmox VE Api Token</param>
-    /// <param name="pveUsername">Proxmox VE username</param>
-    /// <param name="pvePassword">Proxmox VE password</param>
-    /// <param name="pveValidateCertificate"></param>
-    /// <param name="loggerFactory"></param>
-    /// <param name="token">Token Telegram Bot</param>
-    /// <param name="chatsIdValid">Valid chats Id</param>
-    /// <param name="out">Output write</param>
-    public BotManager(string pveHostAndPortHA,
-                      string pveApiToken,
-                      string pveUsername,
-                      string pvePassword,
-                      bool pveValidateCertificate,
-                      ILoggerFactory loggerFactory,
-                      string token,
-                      long[] chatsIdValid,
-                      TextWriter @out)
-    {
-        PveHostAndPortHA = pveHostAndPortHA;
-        _pveApiToken = pveApiToken;
-        _pveUsername = pveUsername;
-        _pvePassword = pvePassword;
-        _pveValidateCertificate = pveValidateCertificate;
-        _loggerFactory = loggerFactory;
-
-        _chatsIdValid = chatsIdValid;
-        _out = @out;
-        _lastCommandForChat = [];
-        _chats = [];
-
-        //create telegram
-        BotClient = new TelegramBotClient(token);
-    }
-
-    internal string PveHostAndPortHA { get; set; }
+    internal string PveHostAndPortHA { get; set; } = pveHostAndPortHA;
 
     /// <summary>
     /// Get client
@@ -85,11 +54,11 @@ public class BotManager
     /// <returns></returns>
     internal async Task<PveClient> GetPveClientAsync()
         => await ClientHelper.GetClientAndTryLoginAsync(PveHostAndPortHA,
-                                                        _pveUsername,
-                                                        _pvePassword,
-                                                        _pveApiToken,
-                                                        _pveValidateCertificate,
-                                                       _loggerFactory);
+                                                        pveUsername,
+                                                        pvePassword,
+                                                        pveApiToken,
+                                                        pveValidateCertificate,
+                                                       loggerFactory);
 
     /// <summary>
     /// Bot Id
@@ -107,7 +76,7 @@ public class BotManager
     /// </summary>
     /// <param name="chatId"></param>
     /// <param name="message"></param>
-    public async Task SendMessageAsync(long chatId, string message) => await BotClient.SendMessage(chatId, message);
+    public async Task SendMessageAsync(long chatId, string message) => await BotClient.SendTextMessageAsync(chatId, message);
 
     /// <summary>
     /// Chat info
@@ -124,23 +93,23 @@ public class BotManager
 
 
         BotClient.StartReceiving(updateHandler: HandleUpdateAsync,
-                                 errorHandler: HandlePollingErrorAsync,
+                                 pollingErrorHandler: HandlePollingErrorAsync,
                                  receiverOptions: new ReceiverOptions
                                  {
-                                     AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+                                     AllowedUpdates = [] // receive all update types
                                  },
                                  cancellationToken: Cts.Token);
 
-        var result = BotClient.GetMe().Result;
+        var result = BotClient.GetMeAsync().Result;
         Username = result.Username;
 
-        _out.WriteLine($@"Start listening
+        @out.WriteLine($@"Start listening
 Telegram
   Bot User: @{Username}
   Bot UserId: @{result.Id}
 Proxmox VE
   Host: {PveHostAndPortHA}
-  Username: {_pveUsername}");
+  Username: {pveUsername}");
     }
 
     /// <summary>
@@ -175,15 +144,15 @@ Proxmox VE
             _ => exception.ToString()
         };
 
-        await _out.WriteLineAsync(ErrorMessage);
+        await @out.WriteLineAsync(ErrorMessage);
     }
 
     private async Task ProcessCallbackQuery(CallbackQuery callbackQuery)
     {
-        await _out.WriteLineAsync($"OnCallbackQuery: {callbackQuery.Data}");
+        await @out.WriteLineAsync($"OnCallbackQuery: {callbackQuery.Data}");
 
         var chatId = callbackQuery.Message.Chat.Id;
-        await BotClient.DeleteMessage(chatId, callbackQuery.Message.MessageId);
+        await BotClient.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
 
         try
         {
@@ -202,14 +171,14 @@ Proxmox VE
         }
         catch (Exception ex)
         {
-            await _out.WriteLineAsync(ex.StackTrace);
+            await @out.WriteLineAsync(ex.StackTrace);
             await BotClient.SendTextMessageAsyncNoKeyboard(chatId, $"Error CallbackQuery! {ex.Message}");
         }
     }
 
     private async Task ProcessMessage(Message message)
     {
-        if (message.Text is not { } messageText) { return; }
+        if (message.Text is not { }) { return; }
 
         _chats.TryAdd(message.Chat.Id, $"{message.Chat.Username} - {message.Chat.LastName} {message.Chat.FirstName}");
 
@@ -219,13 +188,13 @@ Proxmox VE
                   $" - '{message.Chat.FirstName} {message.Chat.LastName}'" +
                   $" Msg Type: '{message.Type}'";
         if (message.Type == MessageType.Text) { log += $" => '{message.Text}'"; }
-        await _out.WriteLineAsync(log);
+        await @out.WriteLineAsync(log);
 
         //check security Chat
-        if (_chatsIdValid.Any() && !_chatsIdValid.Contains(chatId))
+        if (chatsIdValid.Any() && !chatsIdValid.Contains(chatId))
         {
-            await _out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{message.Chat.Username}' not permitted access!");
-            await BotClient.SendMessage(chatId, "You not have permission in this Chat!");
+            await @out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{message.Chat.Username}' not permitted access!");
+            await BotClient.SendTextMessageAsync(chatId, "You not have permission in this Chat!");
             return;
         }
 
@@ -251,7 +220,7 @@ Proxmox VE
         catch (Exception ex)
         {
             _lastCommandForChat.Remove(chatId);
-            await _out.WriteLineAsync(ex.StackTrace);
+            await @out.WriteLineAsync(ex.StackTrace);
             await BotClient.SendTextMessageAsyncNoKeyboard(chatId, $"Error execute command! {ex.Message}");
         }
     }

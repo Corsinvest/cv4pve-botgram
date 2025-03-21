@@ -1,46 +1,49 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
+		<OutputType>Library</OutputType>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
 
-    <Version>1.8.0</Version>
-    <Company>Corsinvest Srl</Company>
-    <Authors>Daniele Corsini</Authors>
-    <Copyright>Corsinvest Srl</Copyright>
-    <Product>Corsinvest for Proxmox VE Botgram Api</Product>
-    <AssemblyTitle>Corsinvest for Proxmox VE Botgram Api</AssemblyTitle>
-    <Description>Corsinvest for Proxmox VE Botgram Api</Description>
+		<Version>1.8.2</Version>
 
-    <PackageTags>ProxmoxVE;Api,Client;Rest;Corsinvest;Botgram</PackageTags>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <PackageIcon>icon.png</PackageIcon>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RepositoryType>Github</RepositoryType>
-    <RepositoryUrl>https://github.com/Corsinvest/cv4pve-botgram</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/Corsinvest/cv4pve-botgram</PackageProjectUrl>
+		<Company>Corsinvest Srl</Company>
+		<Authors>Corsinvest Srl</Authors>
+		<Copyright>Corsinvest Srl</Copyright>
 
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+		<PackageProjectUrl>https://github.com/Corsinvest/cv4pve-botgram</PackageProjectUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>ProxmoxVE;Api,Client;Rest;Corsinvest;Botgram</PackageTags>
+		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+		<PackageOutputPath>..\..\..\.nupkgs\</PackageOutputPath>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Corsinvest/cv4pve-botgram</RepositoryUrl>
 
-  <ItemGroup>
-    <None Include="..\..\LICENSE.md" Pack="true" PackagePath="" />
-    <None Include="..\..\icon.png" Pack="true" PackagePath="" />
-    <none Include="..\..\README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<!-- Include symbol files (*.pdb) in the built .nupkg -->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>
+			$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb
+		</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
-  <ItemGroup>
-    <!-- <ProjectReference
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\LICENSE.md" Pack="true" PackagePath="" />
+		<None Include="..\..\icon.png" Pack="true" PackagePath="" />
+		<none Include="..\..\README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- <ProjectReference
     Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Extension\Corsinvest.ProxmoxVE.Api.Extension.csproj"
     /> -->
-    <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.3.2" />
-    <PackageReference Include="Telegram.Bot" Version="22.4.4" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-  </ItemGroup>
-
-  <Target Name="SpicNSpan" AfterTargets="Clean">
-    <RemoveDir Directories="$(TargetDir)" />
-    <RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />
-    <RemoveDir Directories="$(ProjectDir)$(BaseOutputPath)" />
-  </Target>
+		<PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" Version="8.3.3" />
+		<PackageReference Include="Telegram.Bot" Version="19.0.0" />
+		<!--<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />-->
+	</ItemGroup>
 </Project>

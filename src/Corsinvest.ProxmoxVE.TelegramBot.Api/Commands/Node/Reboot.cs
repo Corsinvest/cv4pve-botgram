@@ -1,9 +1,15 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Node.Api;
+
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
+ */
+
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands.Node;
 
 internal class Reboot: Base
 {

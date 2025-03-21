@@ -1,12 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
 
 internal class Start : Help
 {

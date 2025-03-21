@@ -1,18 +1,15 @@
 ﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: 2019 Copyright Corsinvest Srl
+ * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Extension;
 using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Vm;
-using Corsinvest.ProxmoxVE.TelegramBot.Api;
-using Corsinvest.ProxmoxVE.TelegramBot.Commands.Api;
-using Corsinvest.ProxmoxVE.TelegramBot.Helpers.Api;
+using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot.Types;
 
-namespace Corsinvest.ProxmoxVE.TelegramBot.Commands.Vm.Api;
+namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands.Vm;
 
 internal abstract class Base : Command
 {
