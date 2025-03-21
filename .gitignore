@@ -329,5 +329,6 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder
 .mfractor/
 
-*.Parm
+*.parm
 artifacts_nupkg/
+
