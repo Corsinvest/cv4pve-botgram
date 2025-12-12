@@ -4,10 +4,8 @@
  */
 
 using Corsinvest.ProxmoxVE.Api;
-using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
 using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -22,43 +20,30 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api;
 /// <remarks>
 /// Constructor
 /// </remarks>
-/// <param name="pveHostAndPortHA">Proxmox VE host and port HA format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006</param>
-/// <param name="pveApiToken">Proxmox VE Api Token</param>
-/// <param name="pveUsername">Proxmox VE username</param>
-/// <param name="pvePassword">Proxmox VE password</param>
-/// <param name="pveValidateCertificate"></param>
-/// <param name="loggerFactory"></param>
+/// <param name="clientFactory"></param>
 /// <param name="token">Token Telegram Bot</param>
 /// <param name="chatsIdValid">Valid chats Id</param>
 /// <param name="out">Output write</param>
-public class BotManager(string pveHostAndPortHA,
-                        string pveApiToken,
-                        string pveUsername,
-                        string pvePassword,
-                        bool pveValidateCertificate,
-                        ILoggerFactory loggerFactory,
+public class BotManager(Func<Task<PveClient>> clientFactory,
                         string token,
                         long[] chatsIdValid,
                         TextWriter @out)
 {
     private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat = [];
-    private CancellationTokenSource Cts;
+    private CancellationTokenSource _cts = null!;
     private Dictionary<long, string> _chats = [];
     internal TelegramBotClient BotClient { get; private set; } = new TelegramBotClient(token);
 
-    internal string PveHostAndPortHA { get; set; } = pveHostAndPortHA;
+    /// <summary>
+    /// Event raised when a fatal error occurs
+    /// </summary>
+    public event EventHandler<Exception>? FatalError;
 
     /// <summary>
     /// Get client
     /// </summary>
     /// <returns></returns>
-    internal async Task<PveClient> GetPveClientAsync()
-        => await ClientHelper.GetClientAndTryLoginAsync(PveHostAndPortHA,
-                                                        pveUsername,
-                                                        pvePassword,
-                                                        pveApiToken,
-                                                        pveValidateCertificate,
-                                                       loggerFactory);
+    internal async Task<PveClient> GetPveClientAsync() => await clientFactory.Invoke();
 
     /// <summary>
     /// Bot Id
@@ -69,7 +54,7 @@ public class BotManager(string pveHostAndPortHA,
     /// Chat username
     /// </summary>
     /// <value></value>
-    public string Username { get; private set; }
+    public string Username { get; private set; } = default!;
 
     /// <summary>
     /// Send message
@@ -84,13 +69,24 @@ public class BotManager(string pveHostAndPortHA,
     public IReadOnlyDictionary<long, string> Chats => _chats;
 
     /// <summary>
+    /// Get info connection
+    /// </summary>
+    /// <returns></returns>
+    public async Task<string> GetInfoConenctionAsync()
+    {
+        var client = await GetPveClientAsync();
+        return $"{client.Host}:{client.Port}";
+    }
+
+    /// <summary>
     /// Start chat
     /// </summary>
-    public void StartReceiving()
+    public async Task StartReceiving()
     {
-        Cts = new CancellationTokenSource();
+        _cts = new();
         _chats = [];
 
+        var client = await GetPveClientAsync();
 
         BotClient.StartReceiving(updateHandler: HandleUpdateAsync,
                                  pollingErrorHandler: HandlePollingErrorAsync,
@@ -98,18 +94,17 @@ public class BotManager(string pveHostAndPortHA,
                                  {
                                      AllowedUpdates = [] // receive all update types
                                  },
-                                 cancellationToken: Cts.Token);
+                                 cancellationToken: _cts.Token);
 
-        var result = BotClient.GetMeAsync().Result;
-        Username = result.Username;
+        var result = await BotClient.GetMeAsync();
+        Username = result.Username!;
 
         @out.WriteLine($@"Start listening
 Telegram
   Bot User: @{Username}
   Bot UserId: @{result.Id}
 Proxmox VE
-  Host: {PveHostAndPortHA}
-  Username: {pveUsername}");
+  {await GetInfoConenctionAsync()}");
     }
 
     /// <summary>
@@ -118,8 +113,8 @@ Proxmox VE
     public void StopReceiving()
     {
         //Send cancellation request to stop bot
-        Cts.Cancel();
-        Cts = null;
+        _cts?.Cancel();
+        _cts = null!;
         _chats = [];
     }
 
@@ -144,6 +139,23 @@ Proxmox VE
             _ => exception.ToString()
         };
 
+        // Check for fatal errors that should stop the bot
+        if (exception is ApiRequestException apiEx)
+        {
+            // Fatal errors: 401 Unauthorized, 403 Forbidden, 404 Not Found (invalid bot token)
+            if (apiEx.ErrorCode == 401 || apiEx.ErrorCode == 403 || apiEx.ErrorCode == 404)
+            {
+                await @out.WriteLineAsync($"FATAL ERROR: {ErrorMessage}");
+                await @out.WriteLineAsync("Bot cannot continue with invalid credentials. Stopping...");
+
+                // Notify listeners and stop polling
+                FatalError?.Invoke(this, exception);
+                StopReceiving();
+                return;
+            }
+        }
+
+        // Non-fatal errors: just log them
         await @out.WriteLineAsync(ErrorMessage);
     }
 
@@ -151,8 +163,11 @@ Proxmox VE
     {
         await @out.WriteLineAsync($"OnCallbackQuery: {callbackQuery.Data}");
 
-        var chatId = callbackQuery.Message.Chat.Id;
-        await BotClient.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
+        var chatId = callbackQuery.Message?.Chat.Id ?? 0;
+        if (callbackQuery.Message != null)
+        {
+            await BotClient.DeleteMessageAsync(chatId, callbackQuery.Message.MessageId);
+        }
 
         try
         {
@@ -191,7 +206,7 @@ Proxmox VE
         await @out.WriteLineAsync(log);
 
         //check security Chat
-        if (chatsIdValid.Any() && !chatsIdValid.Contains(chatId))
+        if (chatsIdValid.Length != 0 && !chatsIdValid.Contains(chatId))
         {
             await @out.WriteLineAsync($"Security: Chat Id '{chatId}' - Username '{message.Chat.Username}' not permitted access!");
             await BotClient.SendTextMessageAsync(chatId, "You not have permission in this Chat!");

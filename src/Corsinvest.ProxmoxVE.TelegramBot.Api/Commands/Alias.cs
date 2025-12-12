@@ -23,8 +23,8 @@ internal class Alias : Command
 
     private RequestType _requestType = RequestType.Action;
     private readonly ApiExplorerHelper.AliasManager _aliasManager;
-    private string _name;
-    private string _description;
+    private string _name = string.Empty;
+    private string _description = string.Empty;
 
     public Alias()
     {
@@ -97,7 +97,7 @@ internal class Alias : Command
                 break;
 
             case RequestType.CreateRequestName:
-                _name = message.Text.Trim();
+                _name = message.Text?.Trim() ?? string.Empty;
                 if (_aliasManager.Exists(_name))
                 {
                     await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{_name}'");
@@ -111,13 +111,13 @@ internal class Alias : Command
                 break;
 
             case RequestType.CreateRequestDescription:
-                _description = message.Text.Trim();
+                _description = message.Text!.Trim();
                 await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command");
                 _requestType = RequestType.CreateRequestCommand;
                 break;
 
             case RequestType.CreateRequestCommand:
-                _aliasManager.Create(_name, _description, message.Text.Trim(), false);
+                _aliasManager.Create(_name, _description, message.Text!.Trim(), false);
                 await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command created!");
                 _aliasManager.Save();
                 endCommand = true;

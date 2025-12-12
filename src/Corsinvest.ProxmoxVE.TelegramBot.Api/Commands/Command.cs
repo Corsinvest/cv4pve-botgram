@@ -14,7 +14,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
 /// </summary>
 public abstract class Command
 {
-    private static ClassApi _classApiRoot;
+    private static ClassApi _classApiRoot = null!;
 
     /// <summary>
     /// Show in Help
@@ -54,7 +54,9 @@ public abstract class Command
                                       .Where(a => !a.IsAbstract &&
                                                   a.IsSubclassOf(typeof(Command)) &&
                                                   !a.IsAssignableFrom(typeof(AliasCommand)))
-                                      .Select(a => (Command)Activator.CreateInstance(a))
+                                      .Select(a => (Command?)Activator.CreateInstance(a))
+                                      .Where(a => a != null)
+                                      .Cast<Command>()
                                       .ToList();
 
         commands.AddRange(new Alias().GetCommandsFromAlias());
@@ -82,7 +84,7 @@ public abstract class Command
 
     internal static Command GetCommand(string messageText)
     {
-        Command command = null;
+        Command command = null!;
 
         if (messageText.Trim().StartsWith("/"))
         {
@@ -90,7 +92,7 @@ public abstract class Command
             var pos = name.IndexOf(" ");
             if (pos > 0) { name = name[..pos]; }
 
-            command = GetCommands().FirstOrDefault(a => a.Names.Contains(name) || name == a.Name);
+            command = GetCommands().FirstOrDefault(a => a.Names.Contains(name) || name == a.Name)!;
         }
 
         return command;

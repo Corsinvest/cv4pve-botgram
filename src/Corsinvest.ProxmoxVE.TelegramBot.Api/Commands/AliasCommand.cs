@@ -12,7 +12,7 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
 internal class AliasCommand : Command
 {
     private readonly ApiExplorerHelper.AliasDef _aliasDef;
-    private Command _commandRef;
+    private Command? _commandRef;
 
     public AliasCommand(ApiExplorerHelper.AliasDef aliasDef)
     {
@@ -32,11 +32,12 @@ internal class AliasCommand : Command
             var command = _aliasDef.Command;
             if (!command.StartsWith("/")) { command = "/" + command; }
             var name = command.Trim().Split(' ')[0];
-            _commandRef = message.Type == MessageType.Text ?
-                            GetCommand(name) :
-                            null;
+            _commandRef = message.Type == MessageType.Text ? GetCommand(name) : null;
 
-            message.Text = command;
+            if (message.Text != null)
+            {
+                message.Text = command;
+            }
         }
 
         if (_commandRef == null) { return true; }
@@ -45,5 +46,8 @@ internal class AliasCommand : Command
     }
 
     public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
-        => await _commandRef.Execute(message, callbackQuery, botManager);
+    {
+        if (_commandRef == null) { return true; }
+        return await _commandRef.Execute(message, callbackQuery, botManager);
+    }
 }

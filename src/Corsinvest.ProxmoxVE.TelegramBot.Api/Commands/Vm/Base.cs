@@ -26,12 +26,17 @@ internal abstract class Base : Command
 
     public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
     {
+        if (string.IsNullOrWhiteSpace(callbackQuery.Data)) { return true; }
+
         var client = await botManager.GetPveClientAsync();
         var vm = await client.GetVmAsync(callbackQuery.Data);
         await VmHelper.ChangeStatusVmAsync(client, vm.Node, vm.VmType, vm.VmId, StatusToChange);
 
-        await botManager.BotClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
-                                                                  $"VM/CT {vm.Id} on node {vm.Node} {StatusToChange}!");
+        if (callbackQuery.Message != null)
+        {
+            await botManager.BotClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
+                                                                      $"VM/CT {vm.Id} on node {vm.Node} {StatusToChange}!");
+        }
 
         return true;
     }

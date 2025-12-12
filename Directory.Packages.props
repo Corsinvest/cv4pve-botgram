@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <PackageOutputPath>..\nupkgs\</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+		<PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Extension" Version="9.1.0" />
+    <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Console" Version="9.1.0" />
+    <PackageVersion Include="Telegram.Bot" Version="19.0.0" />
+  </ItemGroup>
+</Project>

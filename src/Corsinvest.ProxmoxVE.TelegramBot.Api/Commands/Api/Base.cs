@@ -29,8 +29,8 @@ internal abstract class Base : Command
     }
 
     protected abstract MethodType MethodType { get; }
-    protected string FileName { get; }
-    private string _messageText;
+    protected string FileName { get; set; } = string.Empty;
+    private string _messageText = string.Empty;
     private TypeRequest _typeRequest = TypeRequest.Start;
 
     public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
@@ -41,7 +41,10 @@ internal abstract class Base : Command
             await Task.CompletedTask;
         }
 
-        ReplaceArg(callbackQuery.Data);
+        if (!string.IsNullOrWhiteSpace(callbackQuery.Data))
+        {
+            ReplaceArg(callbackQuery.Data);
+        }
 
         return await ExecuteOrChoose(message, botManager);
     }
@@ -49,7 +52,9 @@ internal abstract class Base : Command
     private async Task<bool> ExecuteOrChoose(Message message, BotManager botManager)
     {
         var endCommand = false;
-        var cmdArgs = new Parser().Parse(_messageText).Tokens.Select(a => a.Value).ToList();
+
+        // Parse command line arguments - handle quoted strings properly
+        var cmdArgs = CommandLineParser.SplitCommandLine(_messageText).ToList();
         if (cmdArgs.Count == 0)
         {
             //request resource
@@ -64,7 +69,7 @@ internal abstract class Base : Command
             var parameters = cmdArgs.Skip(1).ToArray();
             var parametersArgs = parameters.SelectMany(a => ApiExplorerHelper.GetArgumentTags(a)).ToList();
 
-            if (requestArgs.Any())
+            if (requestArgs.Length != 0)
             {
                 //fix request
                 resource = resource[..(resource.IndexOf(ApiExplorerHelper.CreateArgumentTag(requestArgs[0])) - 1)];
@@ -135,13 +140,13 @@ internal abstract class Base : Command
         switch (_typeRequest)
         {
             case TypeRequest.Start:
-                _messageText = message.Text;
-                var args = new Parser().Parse(_messageText).Tokens.Select(a => a.Value).ToList();
+                _messageText = message.Text!;
+                var args = CommandLineParser.SplitCommandLine(_messageText).ToList();
                 if (args.Count > 1) { _messageText = string.Join(" ", [.. args.Skip(1)]); }
                 break;
 
-            case TypeRequest.Resource: _messageText = message.Text; break;
-            case TypeRequest.ArgParameter: ReplaceArg(message.Text); break;
+            case TypeRequest.Resource: _messageText = message.Text!; break;
+            case TypeRequest.ArgParameter: ReplaceArg(message.Text!); break;
             default: break;
         }
 

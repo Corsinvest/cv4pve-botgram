@@ -34,7 +34,7 @@ internal class Usage : Command
 
             case TypeRequest.Resource:
                 var ret = ApiExplorerHelper.Usage(await GetClassApiRoot(await botManager.GetPveClientAsync()),
-                                                  message.Text.Trim(),
+                                                  message.Text!.Trim(),
                                                   TableGenerator.Output.Html,
                                                   true,
                                                   null,
