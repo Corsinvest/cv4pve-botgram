@@ -20,11 +20,16 @@ internal abstract class Base : Command
 
     public override async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
     {
+        if (string.IsNullOrWhiteSpace(callbackQuery.Data)) { return true; }
+
         var action = ForReboot ? "reboot" : "shutdown";
         await (await botManager.GetPveClientAsync()).Nodes[callbackQuery.Data].Status.NodeCmd(action);
 
-        await botManager.BotClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
-                                                                  $"Node {callbackQuery.Data} action {action}!");
+        if (callbackQuery.Message != null)
+        {
+            await botManager.BotClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
+                                                                      $"Node {callbackQuery.Data} action {action}!");
+        }
 
         return true;
     }

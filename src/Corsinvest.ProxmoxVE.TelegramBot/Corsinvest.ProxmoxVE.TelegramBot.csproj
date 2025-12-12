@@ -1,39 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<Version>1.7.0</Version>
-		<LangVersion>latest</LangVersion>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<AssemblyName>cv4pve-botgram</AssemblyName>
-		<Company>Corsinvest Srl</Company>
-		<Authors>Corsinvest Srl</Authors>
-		<Copyright>Corsinvest Srl</Copyright>
-		<Product>Corsinvest for Proxmox VE Bot Telegram</Product>
-		<AssemblyTitle>Corsinvest for Proxmox VE Bot Telegram</AssemblyTitle>
-		<Description>Corsinvest for Proxmox VE Bot Telegram</Description>
-		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-		<ImplicitUsings>enable</ImplicitUsings>
+		<Product>Corsinvest for Proxmox VE Telegram Bot</Product>
+		<Description>Telegram Bot for Proxmox VE management</Description>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<PredefinedCulturesOnly>false</PredefinedCulturesOnly>
-		<SignAssembly>False</SignAssembly>
-		<PackageProjectUrl>https://github.com/Corsinvest/cv4pve-botgram</PackageProjectUrl>
-		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/Corsinvest/cv4pve-botgram</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\..\LICENSE.md" Pack="true" PackagePath="" />
-		<None Include="..\..\icon.png" Pack="true" PackagePath="" />
-		<none Include="..\..\README.md" Pack="true" PackagePath="" />
+		<PackageReference Include="Corsinvest.ProxmoxVE.Api.Console" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- <ProjectReference Include="..\..\..\cv4pve-api-dotnet\src\Corsinvest.ProxmoxVE.Api.Shell\Corsinvest.ProxmoxVE.Api.Shell.csproj" /> -->
-		<PackageReference Include="Corsinvest.ProxmoxVE.Api.Shell" Version="8.3.3" />
-
 		<ProjectReference Include="..\Corsinvest.ProxmoxVE.TelegramBot.Api\Corsinvest.ProxmoxVE.TelegramBot.Api.csproj" />
-		<!-- <PackageReference Include="Corsinvest.ProxmoxVE.TelegramBot.Api" Version="1.6.3" /> -->
 	</ItemGroup>
 </Project>
