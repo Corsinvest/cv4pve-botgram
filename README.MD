@@ -1,5 +1,3 @@
-<div align="center">
-
 # cv4pve-botgram
 
 ```
@@ -17,8 +15,6 @@ Telegram Bot for Proxmox VE (Made in Italy)
 [![Downloads](https://img.shields.io/github/downloads/Corsinvest/cv4pve-botgram/total.svg?style=flat-square&logo=download)](https://github.com/Corsinvest/cv4pve-botgram/releases)
 [![NuGet](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.TelegramBot.Api.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.TelegramBot.Api/)
 
-</div>
-
 ---
 
 ## Quick Start
@@ -35,29 +31,9 @@ chmod +x cv4pve-botgram
 
 ---
 
-## Table of Contents
-
-<details>
-<summary><strong>Click to expand navigation</strong></summary>
-
-- [Features](#features)
-- [Installation](#installation)
-- [Telegram Bot Setup](#telegram-bot-setup)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [API Token](#api-token)
-
-</details>
-
----
-
 ## Features
 
 ### Core Capabilities
-
-<table>
-<tr>
-<td width="50%">
 
 #### **Performance & Reliability**
 - **Native C#** implementation
@@ -73,9 +49,6 @@ chmod +x cv4pve-botgram
 - **Mobile management** from anywhere
 - **Rich documentation** generated at runtime
 
-</td>
-<td width="50%">
-
 #### **Proxmox VE Control**
 - **VM/CT operations** (start, stop, shutdown, reset)
 - **Node management** (shutdown, reboot)
@@ -90,17 +63,9 @@ chmod +x cv4pve-botgram
 - **Error resilience** with comprehensive logging
 - **Check-Update** and upgrade capabilities
 
-</td>
-</tr>
-</table>
-
 ---
 
 ## Installation
-
-<div align="center">
-  <img src="https://img.shields.io/badge/INSTALLATION-GUIDE-green?style=for-the-badge&logo=download" alt="Installation Guide">
-</div>
 
 ### Linux Installation
 
@@ -154,10 +119,6 @@ sudo mv cv4pve-botgram /usr/local/bin/
 
 ## Telegram Bot Setup
 
-<div align="center">
-  <img src="https://img.shields.io/badge/TELEGRAM-BOT%20SETUP-blue?style=for-the-badge&logo=telegram" alt="Telegram Bot Setup">
-</div>
-
 You don't need to write any code for this. In fact, you don't even need your computer! Go to the telegram app on your phone and…
 
 ### Step 1: Find BotFather
@@ -193,10 +154,6 @@ Congratulations! You have created your first bot. You should see a new API token
 ---
 
 ## Configuration
-
-<div align="center">
-  <img src="https://img.shields.io/badge/CONFIGURATION-SETUP-blue?style=for-the-badge&logo=settings" alt="Configuration Setup">
-</div>
 
 ### Command Line Options
 
@@ -332,10 +289,6 @@ sudo journalctl -u cv4pve-botgram -f
 
 ## Usage
 
-<div align="center">
-  <img src="https://img.shields.io/badge/USAGE-EXAMPLES-orange?style=for-the-badge&logo=terminal" alt="Usage Examples">
-</div>
-
 In Telegram, open a chat with your bot and execute the `/help` command to see all available commands.
 
 [Web Chat Telegram](https://web.telegram.org/#/)
@@ -363,26 +316,12 @@ The bot provides direct access to Proxmox VE API through Telegram. Below is a pa
 
 ---
 
-## API Token
-
-<div align="center">
-  <img src="https://img.shields.io/badge/API-TOKEN-red?style=for-the-badge&logo=key" alt="API Token">
-</div>
-
-From version 6.2 of Proxmox VE is possible to use [API token](https://pve.proxmox.com/pve-docs/pveum-plain.html).
-This feature permits executing API calls without using username and password.
-If using **Privilege Separation** when creating an API token, remember to specify permissions accordingly.
-
----
-
 ## Support
 
 Professional support and consulting available through [Corsinvest](https://www.corsinvest.it/cv4pve).
 
 ---
 
-<div align="center">
-  <sub>Part of <a href="https://www.corsinvest.it/cv4pve">cv4pve</a> suite | Made with ❤️ in Italy by <a href="https://www.corsinvest.it">Corsinvest</a></sub>
-  <br>
-  <sub>Copyright © Corsinvest Srl</sub>
-</div>
+Part of [cv4pve](https://www.corsinvest.it/cv4pve) suite | Made with ❤️ in Italy by [Corsinvest](https://www.corsinvest.it)
+
+Copyright © Corsinvest Srl
