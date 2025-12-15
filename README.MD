@@ -245,7 +245,7 @@ nssm remove cv4pve-botgram confirm
 
 For Linux systems, create a systemd service file.
 
-```bash
+```ini
 # Create service file
 sudo nano /etc/systemd/system/cv4pve-botgram.service
 
