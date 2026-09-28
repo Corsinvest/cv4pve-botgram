@@ -10,12 +10,10 @@ permissions:
 
 jobs:
   publish:
-    uses: Corsinvest/.github/.github/workflows/cv4pve-cli-publish.yml@main
+    uses: Corsinvest/.github/.github/workflows/cv4pve-tools-publish.yml@main
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
       WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
     with:
       project-name: cv4pve-botgram
       project-path: src/Corsinvest.ProxmoxVE.TelegramBot/Corsinvest.ProxmoxVE.TelegramBot.csproj
-      nuget-project-path: src/Corsinvest.ProxmoxVE.TelegramBot.Api/Corsinvest.ProxmoxVE.TelegramBot.Api.csproj
-      winget-id: Corsinvest.cv4pve.botgram
