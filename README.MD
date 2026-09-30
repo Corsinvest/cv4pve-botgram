@@ -158,7 +158,7 @@ Follow instructions and make a new name for your bot. If you are making a bot ju
 
 Congratulations! You have created your first bot. You should see a new API token generated for it.
 
-**Example token:** `707587383:AAHD9DVwXrBxz8wyOl0DWLdbzl8skkffhRo`
+**Example token:** `123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
 
 ---
 
@@ -187,19 +187,19 @@ Options:
 
 ```bash
 # Basic usage (console mode)
-cv4pve-botgram --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=707587383:AAHD9DVwXrBxz8wyOl0DWLdbzl8skkffhRo
+cv4pve-botgram --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # With Chat ID restriction (recommended)
-cv4pve-botgram --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=707587383:AAHD9DVwXrBxz8wyOl0DWLdbzl8skkffhRo --chatsId=123456789,987654321
+cv4pve-botgram --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx --chatsId=123456789,987654321
 
 # Using API token (recommended)
-cv4pve-botgram --host=192.168.0.100 --api-token=telegram-bot@pve!bot=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --token=707587383:AAHD9DVwXrBxz8wyOl0DWLdbzl8skkffhRo
+cv4pve-botgram --host=192.168.0.100 --api-token=telegram-bot@pve!bot=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Multiple hosts for HA
-cv4pve-botgram --host=pve1.local:8006,pve2.local:8006,pve3.local:8006 --username=root@pam --password=YOUR_PASSWORD --token=707587383:AAHD9DVwXrBxz8wyOl0DWLdbzl8skkffhRo
+cv4pve-botgram --host=pve1.local:8006,pve2.local:8006,pve3.local:8006 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Service mode (background)
-cv4pve-botgram --service-mode --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=707587383:AAHD9DVwXrBxz8wyOl0DWLdbzl8skkffhRo
+cv4pve-botgram --service-mode --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ---
