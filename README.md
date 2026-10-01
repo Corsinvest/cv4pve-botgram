@@ -15,6 +15,7 @@ Telegram Bot for Proxmox VE (Made in Italy)
 [![Downloads](https://img.shields.io/github/downloads/Corsinvest/cv4pve-botgram/total.svg?style=flat-square&logo=download)](https://github.com/Corsinvest/cv4pve-botgram/releases)
 [![NuGet](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.TelegramBot.Api.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.TelegramBot.Api/)
 [![WinGet](https://img.shields.io/winget/v/Corsinvest.cv4pve.botgram?style=flat-square&logo=windows)](https://winstall.app/apps/Corsinvest.cv4pve.botgram)
+[![AUR](https://img.shields.io/aur/version/cv4pve-botgram?style=flat-square&logo=archlinux)](https://aur.archlinux.org/packages/cv4pve-botgram)
 
 > **Your Proxmox VE cluster in a Telegram chat**: start, stop and shut down VMs and containers, reboot nodes and call any API path from your phone, restricted to the chats you allow.
 >
@@ -78,7 +79,7 @@ Bot   (a file with the status of VM 100)
 # Windows
 winget install Corsinvest.cv4pve.botgram
 
-# Linux (other platforms: see the documentation)
+# Linux (other platforms and packages: see the documentation)
 wget https://github.com/Corsinvest/cv4pve-botgram/releases/latest/download/cv4pve-botgram-linux-x64.zip
 unzip cv4pve-botgram-linux-x64.zip && chmod +x cv4pve-botgram
 

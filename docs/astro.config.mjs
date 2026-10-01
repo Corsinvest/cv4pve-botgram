@@ -23,7 +23,7 @@ export default defineConfig({
           matomo: { url: 'https://matomo.corsinvest.it/', siteId: 14 },
           // Install-and-run panel in the home hero.
           install: {
-            targets: ['linux', 'windows'],
+            targets: ['linux', 'macos', 'windows'],
             run: ['--host=pve01', "--api-token='bot@pve!bot=…'", "--token='<telegram-bot-token>'", '--chatsId=<chat-id>'],
             output: [{ text: 'Start listening', tone: 'ok' }],
           },
