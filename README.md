@@ -1,4 +1,4 @@
-# cv4pve-botgram
+# <img src="icon.png" alt="" height="36" align="top"> cv4pve-botgram
 
 ```
    ______                _                      __
@@ -14,320 +14,107 @@ Telegram Bot for Proxmox VE (Made in Italy)
 [![Release](https://img.shields.io/github/release/Corsinvest/cv4pve-botgram.svg?style=flat-square)](https://github.com/Corsinvest/cv4pve-botgram/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Corsinvest/cv4pve-botgram/total.svg?style=flat-square&logo=download)](https://github.com/Corsinvest/cv4pve-botgram/releases)
 [![NuGet](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.TelegramBot.Api.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.TelegramBot.Api/)
+[![WinGet](https://img.shields.io/winget/v/Corsinvest.cv4pve.botgram?style=flat-square&logo=windows)](https://winstall.app/apps/Corsinvest.cv4pve.botgram)
+
+> **Your Proxmox VE cluster in a Telegram chat**: start, stop and shut down VMs and containers, reboot nodes and call any API path from your phone, restricted to the chats you allow.
+>
+> **[Documentation](https://corsinvest.github.io/cv4pve-botgram/)**
+>
+> Prefer a web interface? cv4pve-botgram also runs inside [cv4pve-admin](https://github.com/Corsinvest/cv4pve-admin), as its [Bots](https://corsinvest.github.io/cv4pve-admin/modules/bots/) module.
 
 ---
 
-## Quick Start
+## Why
 
-```bash
-# Download latest release
-wget https://github.com/Corsinvest/cv4pve-botgram/releases/download/VERSION/cv4pve-botgram-linux-x64.zip
-unzip cv4pve-botgram-linux-x64.zip
-chmod +x cv4pve-botgram
+A VM hangs at night, or a node needs a reboot while you are away from your desk. The Proxmox VE web interface is behind the company network: reaching it means a VPN and a laptop.
 
-# Run the bot
-./cv4pve-botgram --host=YOUR_HOST --username=root@pam --password=YOUR_PASSWORD --token=YOUR_TELEGRAM_BOT_TOKEN
+cv4pve-botgram puts the actions you need in those moments in a Telegram chat. The bot runs inside your network, next to the cluster, and you talk to it from the phone you already carry. It connects out to Telegram and waits for your messages: no port has to be opened towards your network.
+
+It **runs outside the nodes and uses only the Proxmox VE API**: nothing to install on the cluster, no SSH, no root shell. What a chat can do is exactly what the bot's API token is allowed to do.
+
+---
+
+## What a chat looks like
+
 ```
+You   /vmstart
+Bot   Choose Vm
+      [ qemu/100 web01 ]  [ lxc/105 dns ]
+You   (tap "qemu/100 web01")
+Bot   VM/CT qemu/100 on node pve01 Start!
+```
+
+```
+You   /qsts
+Bot   Choose node
+      [ pve01 ]  [ pve02 ]
+You   (tap "pve01")
+Bot   Choose vmid
+      [ 100 ]  [ 101 ]
+You   (tap "100")
+Bot   (a file with the status of VM 100)
+```
+
+`/qsts` is an alias of `get /nodes/{node}/qemu/{vmid}/status/current`: the bot asks for every placeholder. See [Commands](https://corsinvest.github.io/cv4pve-botgram/commands/).
 
 ---
 
 ## Features
 
-### Core Capabilities
-
-#### **Performance & Reliability**
-- **Native C#** implementation
-- **Cross-platform** (Windows, Linux, macOS)
-- **API-based** operation (no root access required)
-- **Cluster support** with automatic VM/CT resolution
-- **High availability** with multiple host support
-
-#### **Telegram Integration**
-- **Full API access** via Telegram chat
-- **Interactive commands** with real-time responses
-- **Secure chat validation** with authorized chats only
-- **Mobile management** from anywhere
-- **Rich documentation** generated at runtime
-
-#### **Proxmox VE Control**
-- **VM/CT operations** (start, stop, shutdown, reset)
-- **Node management** (shutdown, reboot)
-- **API operations** (get, set, create, delete)
-- **Usage monitoring** with detailed statistics
-- **Alias commands** for custom workflows
-
-#### **Enterprise Features**
-- **API token** support (Proxmox VE 6.2+)
-- **SSL validation** options
-- **Multiple host** support for HA
-- **Error resilience** with comprehensive logging
-- **Check-Update** and upgrade capabilities
+- **VMs and containers**: start, shut down, stop and reset, choosing the guest from buttons grouped by node.
+- **Nodes**: reboot or shut down a node, chosen from those online.
+- **Any API call**: `/get`, `/set`, `/create` and `/delete` on any path of the Proxmox VE API, with the answer as a table in a file.
+- **Placeholders**: leave `{node}` or `{vmid}` in a path and the bot offers the values that exist; leave one in a parameter and it asks you to type it.
+- **Aliases**: short names for the calls you repeat. Many are built in for cluster, nodes, VMs and containers, and you add your own from the chat.
+- **Only your chats**: the bot answers only the chat IDs you list; any other chat is refused and logged.
+- **Runs as a service**: one self-contained binary for Linux, Windows and macOS, under systemd or as a Windows service.
+- **Keeps running with a node down**: give it more than one host and it uses the first that answers.
 
 ---
 
-## Installation
-
-### Linux Installation
+## Quick start
 
 ```bash
-# Check available releases and get the specific version number
-# Visit: https://github.com/Corsinvest/cv4pve-botgram/releases
-
-# Download specific version (replace VERSION with actual version like v1.2.3)
-wget https://github.com/Corsinvest/cv4pve-botgram/releases/download/VERSION/cv4pve-botgram-linux-x64.zip
-
-# Alternative: Get latest release URL programmatically
-LATEST_URL=$(curl -s https://api.github.com/repos/Corsinvest/cv4pve-botgram/releases/latest | grep browser_download_url | grep linux-x64 | cut -d '"' -f 4)
-wget "$LATEST_URL"
-
-# Extract and make executable
-unzip cv4pve-botgram-linux-x64.zip
-chmod +x cv4pve-botgram
-
-# Optional: Move to system path
-sudo mv cv4pve-botgram /usr/local/bin/
-```
-
-### Windows Installation
-
-#### Option 1: Winget (Recommended)
-
-```powershell
-# Install using Windows Package Manager
+# Windows
 winget install Corsinvest.cv4pve.botgram
+
+# Linux (other platforms: see the documentation)
+wget https://github.com/Corsinvest/cv4pve-botgram/releases/latest/download/cv4pve-botgram-linux-x64.zip
+unzip cv4pve-botgram-linux-x64.zip && chmod +x cv4pve-botgram
+
+# Run against any node of the cluster, with an API token and the token of your Telegram bot
+./cv4pve-botgram --host=pve1.local --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=<chat-id>
 ```
 
-#### Option 2: Manual Installation
-
-```powershell
-# Check available releases at: https://github.com/Corsinvest/cv4pve-botgram/releases
-# Download specific version (replace VERSION with actual version)
-Invoke-WebRequest -Uri "https://github.com/Corsinvest/cv4pve-botgram/releases/download/VERSION/cv4pve-botgram-win-x64.zip" -OutFile "cv4pve-botgram.zip"
-
-# Extract
-Expand-Archive cv4pve-botgram.zip -DestinationPath "C:\Tools\cv4pve-botgram"
-
-# Add to PATH (optional)
-$env:PATH += ";C:\Tools\cv4pve-botgram"
-```
-
-### macOS Installation
-
-```bash
-# Check available releases at: https://github.com/Corsinvest/cv4pve-botgram/releases
-# Download specific version (replace VERSION with actual version)
-wget https://github.com/Corsinvest/cv4pve-botgram/releases/download/VERSION/cv4pve-botgram-osx-x64.zip
-unzip cv4pve-botgram-osx-x64.zip
-chmod +x cv4pve-botgram
-
-# Move to applications
-sudo mv cv4pve-botgram /usr/local/bin/
-```
+Then send `/help` to your bot. The Telegram token comes from BotFather, see [Telegram bot](https://corsinvest.github.io/cv4pve-botgram/telegram-bot/). Always set `--chatsId`: without it the bot answers every chat. The API token needs the privileges listed in [Permissions](https://corsinvest.github.io/cv4pve-botgram/permissions/).
 
 ---
 
-## Telegram Bot Setup
+## Documentation
 
-You don't need to write any code for this. In fact, you don't even need your computer! Go to the telegram app on your phone and…
-
-### Step 1: Find BotFather
-
-Search for the "botfather" telegram bot (he's the one that'll assist you with creating and managing your bot)
-
-![0](Images/0.png)
-
-### Step 2: Create New Bot
-
-Type `/help` to see all possible commands the botfather can handle
-
-![1](Images/1.png)
-
-Click on or type `/newbot` to create a new bot.
-
-![2](Images/2.png)
-
-### Step 3: Configure Your Bot
-
-Follow instructions and make a new name for your bot. If you are making a bot just for experimentation, it can be useful to namespace your bot by placing your name before it in its username, since it has to be a unique name. Although, its screen name can be whatever you like.
-
-**Example:**
-- **Screen name:** "Frank Test PVE Bot"
-- **Username:** "frank_test_pve_bot"
-
-### Step 4: Get Your Token
-
-Congratulations! You have created your first bot. You should see a new API token generated for it.
-
-**Example token:** `123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+| | |
+|---|---|
+| [Getting started](https://corsinvest.github.io/cv4pve-botgram/getting-started/) | Install, connect, send the first command |
+| [Telegram bot](https://corsinvest.github.io/cv4pve-botgram/telegram-bot/) | Creating the bot with BotFather, restricting it to your chats |
+| [Permissions](https://corsinvest.github.io/cv4pve-botgram/permissions/) | The user, the API token and the privileges of each command |
+| [Connection](https://corsinvest.github.io/cv4pve-botgram/connection/) | Hosts, credentials, certificates, options in a file |
+| [Run as a service](https://corsinvest.github.io/cv4pve-botgram/service/) | Console and service mode, systemd, Windows service |
+| [Commands](https://corsinvest.github.io/cv4pve-botgram/commands/) | Guests, nodes, and how a conversation with the bot works |
+| [API commands](https://corsinvest.github.io/cv4pve-botgram/commands/api/) | `/get`, `/set`, `/create`, `/delete`, placeholders, `/usage` |
+| [Aliases](https://corsinvest.github.io/cv4pve-botgram/commands/aliases/) | The built-in aliases and how to add your own |
+| [Troubleshooting](https://corsinvest.github.io/cv4pve-botgram/troubleshooting/) | What the answers and the log mean when something goes wrong |
 
 ---
 
-## Configuration
+## Related tools
 
-### Command Line Options
-
-```text
-Usage:
-  cv4pve-botgram [options]
-
-Options:
-  --host <host> (REQUIRED)    The host name host[:port],host1[:port],host2[:port]
-  --token <token> (REQUIRED)  Telegram API token bot
-  --username <username>       User name <username>@<realm>
-  --password <password>       The password. Specify 'file:path_file' to store password in file.
-  --api-token <api-token>     Api token format 'USER@REALM!TOKENID=UUID'. Require Proxmox VE 6.2 or later
-  --chatsId <chatsId>         Telegram Chats Id valid for communication (comma separated)
-  --validate-certificate      Validate SSL Certificate Proxmox VE node.
-  --service-mode              Run as background service (runs until stopped, no Enter key)
-  --version                   Show version information
-  -?, -h, --help              Show help and usage information
-```
-
-### Usage Example
-
-```bash
-# Basic usage (console mode)
-cv4pve-botgram --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# With Chat ID restriction (recommended)
-cv4pve-botgram --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx --chatsId=123456789,987654321
-
-# Using API token (recommended)
-cv4pve-botgram --host=192.168.0.100 --api-token=telegram-bot@pve!bot=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# Multiple hosts for HA
-cv4pve-botgram --host=pve1.local:8006,pve2.local:8006,pve3.local:8006 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# Service mode (background)
-cv4pve-botgram --service-mode --host=192.168.0.100 --username=root@pam --password=YOUR_PASSWORD --token=123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
----
-
-## Deployment Options
-
-### Console Mode (Default)
-
-Run the bot in interactive mode. The bot will wait for you to press Enter to stop.
-
-```bash
-./cv4pve-botgram --host=pve.local --token=123456:ABC-DEF
-# Bot is running. Press Enter to stop.
-```
-
-**Best for:** Development, testing, and debugging.
-
-### Service Mode
-
-Run the bot as a background service without console interaction. The bot will continue running until stopped with Ctrl+C.
-
-```bash
-./cv4pve-botgram --service-mode --host=pve.local --token=123456:ABC-DEF
-# Bot is running in background. Press Ctrl+C to stop.
-```
-
-**Best for:** Production environments where you want the bot to run continuously.
-
-### Windows Service with NSSM
-
-For Windows systems, use NSSM (Non-Sucking Service Manager) to run the bot as a proper Windows service.
-
-```powershell
-# Download NSSM: https://nssm.cc/download
-# Install the service
-nssm install cv4pve-botgram "C:\path\to\cv4pve-botgram.exe" --service-mode --host=pve.local --token=123456:ABC-DEF
-
-# Start the service
-nssm start cv4pve-botgram
-
-# View logs
-nssm tail cv4pve-botgram
-
-# Stop the service
-nssm stop cv4pve-botgram
-
-# Uninstall the service
-nssm remove cv4pve-botgram confirm
-```
-
-### Linux Systemd Service
-
-For Linux systems, create a systemd service file.
-
-```ini
-# Create service file
-sudo nano /etc/systemd/system/cv4pve-botgram.service
-
-# Add the following configuration
-[Unit]
-Description=Proxmox VE Telegram Bot
-After=network.target
-
-[Service]
-ExecStart=/usr/local/bin/cv4pve-botgram --service-mode --host=pve.local --token=123456:ABC-DEF
-Restart=always
-User=proxmox
-
-[Install]
-WantedBy=multi-user.target
-
-# Enable and start the service
-sudo systemctl enable cv4pve-botgram
-sudo systemctl start cv4pve-botgram
-
-# Check status
-sudo systemctl status cv4pve-botgram
-
-# View logs
-sudo journalctl -u cv4pve-botgram -f
-```
-
-### Service Mode vs Console Mode
-
-| Feature | Console Mode (Default) | Service Mode (`--service-mode`) |
-|---------|------------------------|--------------------------------|
-| **Interactive Stop** | ✅ Press Enter to stop | ❌ Use Ctrl+C or system stop |
-| **Console Output** | ✅ Full logging to console | ✅ Full logging to console |
-| **Runs in Background** | ❌ Waits for Enter key | ✅ Runs until stopped |
-| **Systemd Integration** | ⚠️ Limited | ✅ Full support with auto-restart |
-| **NSSM Integration** | ⚠️ Limited | ✅ Full support with auto-restart |
-| **Error Handling** | ✅ Exits on fatal errors | ✅ Exits on fatal errors |
-| **Best For** | Development, Testing | Production, Services |
-
----
-
-## Usage
-
-In Telegram, open a chat with your bot and execute the `/help` command to see all available commands.
-
-[Web Chat Telegram](https://web.telegram.org/#/)
-
-### Available Commands
-
-The bot provides direct access to Proxmox VE API through Telegram. Below is a partial list of common commands. Use `/help` in the bot to see the complete list of available commands.
-
-- **/start** - Initialize bot and show welcome message
-- **/help** - Show all available commands
-- **/vm-start** - Start a VM or Container
-- **/vm-stop** - Stop a VM or Container
-- **/vm-shutdown** - Gracefully shutdown a VM or Container
-- **/vm-reset** - Reset a VM or Container
-- **/node-shutdown** - Shutdown a Proxmox VE node
-- **/node-reboot** - Reboot a Proxmox VE node
-- **/api-get** - Execute GET API request
-- **/api-set** - Execute SET/PUT API request
-- **/api-create** - Execute CREATE/POST API request
-- **/api-delete** - Execute DELETE API request
-- **/api-usage** - Show API usage and help
-- **/alias-add** - Add new command alias
-- **/alias-list** - List all aliases
-- **/alias-remove** - Remove alias
+For the same actions from a terminal, with saved clusters and tab completion, see [cv4pve-cli](https://github.com/Corsinvest/cv4pve-cli). The whole suite: [corsinvest.it/cv4pve](https://www.corsinvest.it/en/cv4pve/).
 
 ---
 
 ## Support
 
-Professional support and consulting available through [Corsinvest](https://www.corsinvest.it/cv4pve).
+Professional support and consulting available through [Corsinvest](https://www.corsinvest.it/en/cv4pve/).
 
 ---
 

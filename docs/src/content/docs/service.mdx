@@ -1,0 +1,95 @@
+---
+title: Run as a service
+description: Console mode and service mode of cv4pve-botgram, and how to run it under systemd or as a Windows service.
+---
+
+The bot is useful only while it runs. Started from a terminal it stops when the terminal closes: for
+everyday use run it as a service, so it starts with the machine and comes back after a failure.
+
+## Console and service mode
+
+| | Console mode (default) | Service mode (`--service-mode`) |
+|---|---|---|
+| Stops | when you press Enter | when the process is stopped (Ctrl+C, `systemctl stop`, service stop) |
+| Needs a terminal | yes | no |
+| Output | console | console, collected by systemd or the service manager |
+| For | first tests | everyday use |
+
+In both modes the bot writes every message it receives to the console: date, chat ID, user and text.
+
+## Options file
+
+Keep the options, with the two tokens, in a file readable only by the account that runs the bot, as
+described in [Options in a file](/cv4pve-botgram/connection/#options-in-a-file):
+
+```text
+# /etc/cv4pve/botgram.rsp
+--host=pve01,pve02,pve03
+--api-token=bot@pve!bot=<uuid>
+--token=<telegram-bot-token>
+--chatsId=123456789
+```
+
+## Linux: systemd
+
+Create a dedicated account with a home folder (the bot keeps your [aliases](/cv4pve-botgram/commands/aliases/)
+there) and protect the options file:
+
+```bash
+sudo useradd --system --create-home cv4pve
+sudo chown cv4pve /etc/cv4pve/botgram.rsp
+sudo chmod 600 /etc/cv4pve/botgram.rsp
+```
+
+`/etc/systemd/system/cv4pve-botgram.service`:
+
+```ini
+[Unit]
+Description=cv4pve-botgram, Telegram bot for Proxmox VE
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/cv4pve-botgram @/etc/cv4pve/botgram.rsp --service-mode
+User=cv4pve
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now cv4pve-botgram
+
+sudo systemctl status cv4pve-botgram     # is it running
+sudo journalctl -u cv4pve-botgram -f     # what it logs
+```
+
+Change the path in `ExecStart` to where you put the binary.
+
+## Windows: service with NSSM
+
+Windows cannot run a console program as a service by itself. [NSSM](https://nssm.cc/download) wraps it:
+
+```powershell
+nssm install cv4pve-botgram "C:\Tools\cv4pve-botgram\cv4pve-botgram.exe" "@C:\Tools\cv4pve-botgram\botgram.rsp" --service-mode
+nssm start cv4pve-botgram
+
+nssm status cv4pve-botgram
+nssm stop cv4pve-botgram
+nssm remove cv4pve-botgram confirm
+```
+
+## One bot, one process
+
+Telegram delivers the messages of a bot to one program at a time. Two cv4pve-botgram processes with the
+same `--token` take the messages away from each other: run one process per bot, and use a second bot
+(a second token) for a second cluster.
+
+## When the bot stops by itself
+
+If Telegram refuses the token (HTTP 401, 403 or 404), the bot cannot work: it writes `FATAL ERROR` with
+the reason and exits. Fix `--token` before starting it again; with `Restart=always` systemd would
+otherwise restart it in a loop. Any other Telegram error is written to the log and the bot keeps running.

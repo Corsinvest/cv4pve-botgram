@@ -1,0 +1,108 @@
+---
+title: Aliases
+description: Short names for API calls in cv4pve-botgram, the built-in aliases for cluster, nodes, VMs and containers, and how to add your own from the chat.
+---
+
+An alias is a short name for an [API command](/cv4pve-botgram/commands/api/). Instead of typing
+
+```text
+/get nodes/{node}/qemu/{vmid}/status/current
+```
+
+you send `/qsts`: the bot runs that call, asks for the node and the VM with buttons, and sends the file.
+
+An alias can have several names. `/alias` followed by **List** sends `alias.html`, the complete list with
+the call each alias runs and the placeholders it asks for.
+
+## Built-in aliases
+
+Each one has a long name and a short one; both work. On a phone the short one is quicker.
+
+### Cluster
+
+| Alias | Short | Runs |
+|---|---|---|
+| `/cluster-top` | `/ct`, `/top` | `get /cluster/resources` |
+| `/cluster-top-node` | `/ctn`, `/topn` | `get /cluster/resources type:node` |
+| `/cluster-top-storage` | `/cts`, `/tops` | `get /cluster/resources type:storage` |
+| `/cluster-top-vm` | `/ctv`, `/topv` | `get /cluster/resources type:vm` |
+| `/cluster-status` | `/csts` | `get /cluster/ha/status/current` |
+| `/cluster-replication` | `/crep` | `get /cluster/replication` |
+| `/cluster-backup` | `/cbck` | `get /cluster/backup` |
+| `/cluster-backup-info` | `/cbckinf` | `get /cluster/backup/{backup}` |
+
+### Nodes
+
+| Alias | Short | Runs |
+|---|---|---|
+| `/nodes-list` | `/nlst` | `get /nodes` |
+| `/node-status` | `/nsts` | `get /nodes/{node}/status` |
+| `/node-services` | `/nsvc` | `get /nodes/{node}/services` |
+| `/node-tasks-active` | `/ntact` | `get /nodes/{node}/tasks source:active` |
+| `/node-tasks-error` | `/nterr` | `get /nodes/{node}/tasks errors:1` |
+| `/node-disks-list` | `/ndlst` | `get /nodes/{node}/disks/list` |
+| `/node-version` | `/nver` | `get /nodes/{node}/version` |
+| `/node-storage` | `/nsto` | `get /nodes/{node}/storage` |
+| `/node-storage-content` | `/nstoc` | `get /nodes/{node}/storage/{storage}/content` |
+| `/node-report` | `/nrpt` | `get /nodes/{node}/report` |
+| `/node-vzdump-list` | `/nvlst` | `get /nodes/{node}/storage/{storage}/content vmid:{vmid} content:backup` |
+| `/node-vzdump-config` | `/nvcfg` | `get /nodes/{node}/vzdump/extractconfig volume:{volume}` |
+
+### VMs and containers
+
+The same aliases exist for VMs (`qemu-…`, short names starting with `q`) and for containers (`lxc-…`,
+short names starting with `l`). `…` in the path is `qemu` or `lxc`.
+
+| VM | Container | Runs |
+|---|---|---|
+| `/qemu-list`, `/qlst` | `/lxc-list`, `/llst` | `get /nodes/{node}/…` |
+| `/qemu-status`, `/qsts` | `/lxc-status`, `/lsts` | `get /nodes/{node}/…/{vmid}/status/current` |
+| `/qemu-config`, `/qcfg` | `/lxc-config`, `/lcfg` | `get /nodes/{node}/…/{vmid}/config` |
+| `/qemu-start`, `/qstr` | `/lxc-start`, `/lstr` | `create /nodes/{node}/…/{vmid}/status/start` |
+| `/qemu-shutdown`, `/qsdwn` | `/lxc-shutdown`, `/lsdwn` | `create /nodes/{node}/…/{vmid}/status/shutdown` |
+| `/qemu-stop`, `/qsto` | `/lxc-stop`, `/lsto` | `create /nodes/{node}/…/{vmid}/status/stop` |
+| `/qemu-snap-list`, `/qslst` | `/lxc-snap-list`, `/lslst` | `get /nodes/{node}/…/{vmid}/snapshot` |
+| `/qemu-snap-create`, `/qscrt` | `/lxc-snap-create`, `/lscrt` | `create /nodes/{node}/…/{vmid}/snapshot snapname:{snapname} description:{description}` |
+| `/qemu-snap-config`, `/qscfg` | `/lxc-snap-config`, `/lscfg` | `get /nodes/{node}/…/{vmid}/snapshot/{snapname}/config` |
+| `/qemu-snap-rollback`, `/qsrbck` | `/lxc-snap-rollback`, `/lsrbck` | `create /nodes/{node}/…/{vmid}/snapshot/{snapname}/rollback` |
+| `/qemu-snap-delete`, `/qsdel` | `/lxc-snap-delete`, `/lsdel` | `delete /nodes/{node}/…/{vmid}/snapshot/{snapname}` |
+
+`/vmstart`, `/vmshutdown` and `/vmstop` do the same as the start, shutdown and stop aliases with one tap
+less: they list the guests of the whole cluster, without asking for the node first. See
+[Commands](/cv4pve-botgram/commands/#vms-and-containers).
+
+## Your own aliases
+
+Send `/alias` and tap **Create**. The bot asks three things:
+
+```text
+You   /alias
+Bot   Choose action
+      [ List ]  [ Delete ]
+      [ Create ]
+You   (tap "Create")
+Bot   Name alias
+You   vm-agent-info,vai
+Bot   Description
+You   Guest agent info of a VM
+Bot   Command
+You   get /nodes/{node}/qemu/{vmid}/agent/info
+Bot   Command created!
+```
+
+- **Name**: one or more names separated by commas. Letters, digits, `-` and `_` only. A name already used
+  by another alias, or with other characters, is refused with `Name not valid`.
+- **Description**: shown in the list.
+- **Command**: the method (`get`, `set`, `create` or `delete`), the path and the parameters, as you would
+  write them after `/`, with the [placeholders](/cv4pve-botgram/commands/api/#placeholders) to ask for.
+
+The alias works at once: `/vai`.
+
+To remove one, send `/alias`, tap **Delete** and type one of its names. Built-in aliases cannot be
+deleted.
+
+## Where aliases are kept
+
+In `Corsinvest/cv4pve-botgram/alias.txt` under the home folder of the account that runs the bot: one
+alias per line, with name, description and command separated by tabs. Copy the file to move your aliases
+to another machine. Built-in aliases are part of the program and are not in the file.

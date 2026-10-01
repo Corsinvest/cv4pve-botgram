@@ -1,0 +1,108 @@
+---
+title: API commands
+description: Call any path of the Proxmox VE API from Telegram with /get, /set, /create and /delete, with placeholders the bot fills by asking, and /usage to see what a path accepts.
+---
+
+`/get`, `/set`, `/create` and `/delete` call a path of the Proxmox VE API, the same paths as `pvesh` and
+the [API viewer](https://pve.proxmox.com/pve-docs/api-viewer/index.html). The answer comes back as a file.
+
+| Command | HTTP method | For |
+|---|---|---|
+| `/get` | GET | Reading |
+| `/set` | PUT | Changing settings |
+| `/create` | POST | Creating things and starting actions |
+| `/delete` | DELETE | Removing things |
+
+## A call
+
+Write the path after the command; the leading `/` of the path is optional:
+
+```text
+/get nodes
+/get cluster/resources type:vm
+/create nodes/pve01/qemu/100/status/start
+```
+
+`/get` alone asks for the path with `Insert resource (eg nodes)`.
+
+The answer is an **HTML file** named after the path. Open it to see the data as a table:
+
+- an object, e.g. the status of a node, is one row per key;
+- a list, e.g. the VMs of a node, is one row per item, with the columns the API describes for that path;
+- sizes, percentages, durations and dates are shown in readable form, not as raw numbers, as `pvesh` does.
+
+A call that starts a task, such as starting a VM or creating a snapshot, answers with the ID of the task
+(UPID). The bot does not wait for the task to finish.
+
+If Proxmox VE refuses the call, the bot answers with a message instead of a file: `Error:`, the reason,
+and one line for each wrong parameter.
+
+## Parameters
+
+Parameters follow the path as `name:value`, separated by spaces:
+
+```text
+/get cluster/resources type:node
+/get nodes/pve01/tasks source:active errors:1
+/create nodes/pve01/qemu/100/snapshot snapname:before-update description:"before the update"
+```
+
+A value with spaces goes between double quotes.
+
+## Placeholders
+
+Leave a part of the call as `{name}` and the bot asks for it.
+
+**In the path**, the bot reads what exists under that point of the cluster and offers it as buttons:
+
+```text
+You   /get nodes/{node}/qemu/{vmid}/status/current
+Bot   Choose node
+      [ pve01 ]  [ pve02 ]
+You   (tap "pve01")
+Bot   Choose vmid
+      [ 100 ]  [ 101 ]
+You   (tap "100")
+Bot   (the file with the status of VM 100)
+```
+
+**In a parameter**, the bot asks you to type the value:
+
+```text
+You   /create nodes/{node}/qemu/{vmid}/snapshot snapname:{snapname}
+Bot   Choose node …
+Bot   Choose vmid …
+Bot   Insert value for parametr snapname
+You   before-update
+Bot   (the file with the task ID)
+```
+
+Placeholders are asked one at a time, those of the path first. A typed value is used as you write it: put
+it between double quotes if it has spaces.
+
+Placeholders are what make [aliases](/cv4pve-botgram/commands/aliases/) useful: a call saved once with
+`{node}` and `{vmid}` works for every guest.
+
+## Usage
+
+`/usage` shows what a path accepts. The bot asks for the path and answers with a file, `Usage.html`:
+
+```text
+You   /usage
+Bot   Insert resource (eg nodes)
+You   nodes/{node}/qemu/{vmid}/snapshot
+Bot   (Usage.html)
+```
+
+For each method of the path the file has a `USAGE` line with the required parameters, the description of
+the call, the table of all its parameters with type and description, and the fields of the answer. The
+path may contain placeholders or real values.
+
+The descriptions come from the API schema of your cluster, which the bot reads from the node the first
+time it needs it and keeps while it runs.
+
+## What a chat can call
+
+Every path the bot's API token is allowed to call: the bot has no list of permitted calls of its own.
+Decide what Telegram may do by choosing the privileges of the token, see
+[Permissions](/cv4pve-botgram/permissions/).

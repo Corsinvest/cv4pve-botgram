@@ -1,0 +1,66 @@
+---
+title: Getting started
+description: Install cv4pve-botgram, connect it to a Proxmox VE cluster and to your Telegram bot, and send the first command.
+---
+
+import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
+
+cv4pve-botgram runs **outside the cluster** (on a management VM, a small server, a container) and talks
+only to the Proxmox VE REST API on port 8006. Nothing is installed on the nodes. The machine it runs on
+must reach the nodes and, on the Internet, Telegram: the bot connects out and waits for your messages,
+so no port is opened towards your network.
+
+## Installation
+
+<CliInstall repo="cv4pve-botgram" channels={['linux', 'winget', 'windows', 'macos']} />
+
+## Before the first run
+
+You need two things:
+
+1. **A Telegram bot and its token**, created in a minute from the Telegram app: see
+   [Telegram bot](/cv4pve-botgram/telegram-bot/).
+2. **A Proxmox VE user and API token** with the privileges for what the bot should do: see
+   [Permissions](/cv4pve-botgram/permissions/).
+
+## First run
+
+```bash
+cv4pve-botgram --host=pve1.local --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=<chat-id>
+```
+
+The bot logs in to the cluster and to Telegram, then prints who it is:
+
+```text
+Start listening
+Telegram
+  Bot User: @your_pve_bot
+  Bot UserId: @123456789
+Proxmox VE
+  pve1.local:8006
+```
+
+It keeps running until you press Enter. Open the chat with your bot in Telegram and send `/help`: the bot answers with the list of its commands,
+described in [Commands](/cv4pve-botgram/commands/).
+
+## Options
+
+| Option | What it does |
+|---|---|
+| `--token` | Token of the Telegram bot, from BotFather. Required. |
+| `--chatsId` | Telegram chat IDs allowed to use the bot, separated by commas. See [Restrict the bot to your chats](/cv4pve-botgram/telegram-bot/#restrict-the-bot-to-your-chats). |
+| `--service-mode` | Runs until the process is stopped, without waiting for Enter: for systemd and Windows services, see [Run as a service](/cv4pve-botgram/service/). |
+
+Host, API token, username and password, certificates and keeping the options in a file: see
+[Connection](/cv4pve-botgram/connection/).
+
+:::danger[Always set --chatsId]
+Without `--chatsId` the bot answers **every** chat: anyone who finds the bot in Telegram can use it with
+the privileges of its API token. Set it on every run that is not a first test.
+:::
+
+## Next
+
+- [Commands](/cv4pve-botgram/commands/): guests, nodes, and how a conversation with the bot works.
+- [API commands](/cv4pve-botgram/commands/api/): any path of the Proxmox VE API from the chat.
+- [Run as a service](/cv4pve-botgram/service/): keep the bot running after you close the terminal.

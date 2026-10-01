@@ -1,0 +1,82 @@
+---
+title: cv4pve-botgram
+description: "Telegram bot for Proxmox VE: start, stop and shut down VMs and containers, reboot nodes and call any API path from a chat, restricted to the chats you allow."
+head:
+  # Search results and browser tab: the name and what it is, without Starlight's "| site title" suffix
+  - tag: title
+    content: "cv4pve-botgram: Telegram bot for Proxmox VE"
+  - tag: meta
+    attrs:
+      property: og:title
+      content: "cv4pve-botgram: Telegram bot for Proxmox VE"
+template: splash
+hero:
+  title: Manage your <span class="accent-mark">Proxmox VE</span> cluster from Telegram
+  tagline: "Runs outside the nodes, API only. Start, stop and shut down VMs and containers, reboot nodes and call any API path from a chat on your phone, restricted to the chats you allow."
+  actions:
+    - text: Get started
+      link: /cv4pve-botgram/getting-started/
+      icon: right-arrow
+    - text: See the commands
+      link: /cv4pve-botgram/commands/
+      variant: minimal
+---
+
+import FeatureGrid from '@corsinvest/cv4pve-docs-theme/components/FeatureGrid.astro';
+import CtaBand from '@corsinvest/cv4pve-docs-theme/components/CtaBand.astro';
+import proxmoxLogo from '../../assets/proxmox-logo.svg';
+
+export const features = [
+  { title: "VMs and containers", text: "Start, stop, shut down and reset: the bot lists the guests as buttons, grouped by node, and you tap the one you want.", href: 'commands/#vms-and-containers' },
+  { title: "Nodes", text: "Reboot or shut down a node, chosen from the nodes that are online.", href: 'commands/#nodes' },
+  { title: "Any API call", text: "get, set, create and delete on any path of the Proxmox VE API. Leave a placeholder in the path and the bot asks for it with buttons.", href: 'commands/api/' },
+  { title: "Aliases", text: "Short names for the calls you repeat, such as /qsts for the status of a VM. Many are built in, and you add your own from the chat.", href: 'commands/aliases/' },
+  { title: "Only your chats", text: "The bot answers only the chat IDs you list. Any other chat is refused and written to the log.", href: 'telegram-bot/#restrict-the-bot-to-your-chats' },
+  { title: "Runs as a service", text: "One self-contained binary for Linux, Windows and macOS, in the foreground or as a systemd or Windows service.", href: 'service/' },
+];
+
+```bash
+cv4pve-botgram --host=pve01 --api-token='bot@pve!bot=…' --token='<telegram-bot-token>' --chatsId=<chat-id>
+```
+
+Then, in the chat with your bot:
+
+```text
+You   /vmstart
+Bot   Choose Vm
+      [ qemu/100 web01 ]  [ lxc/105 dns ]
+You   (tap "qemu/100 web01")
+Bot   VM/CT qemu/100 on node pve01 Start!
+```
+
+## Why
+
+A VM hangs at night, or a node needs a reboot while you are away from your desk. The Proxmox VE web
+interface is behind the company network: reaching it means a VPN and a laptop.
+
+cv4pve-botgram puts the actions you need in those moments in a Telegram chat. The bot runs inside your
+network, next to the cluster, and you talk to it from the phone you already carry. It connects out to
+Telegram and waits for your messages: no port has to be opened towards your network.
+
+## Outside the nodes, API only
+
+cv4pve-botgram runs outside the cluster (on a management VM, a small server, a container) and talks
+only to the Proxmox VE REST API. Nothing is installed on the nodes and no SSH or root shell is needed: an
+API token with the privileges listed in [Permissions](/cv4pve-botgram/permissions/) is enough. Give it
+more than one node and it connects to the first one that answers, so it still works while a node is down.
+
+What a chat can do is exactly what the token is allowed to do: a token that can only start and stop
+guests makes a bot that can only start and stop guests.
+
+Prefer a web interface? [cv4pve-admin](https://github.com/Corsinvest/cv4pve-admin) runs the same bot as
+its [Bots](https://corsinvest.github.io/cv4pve-admin/modules/bots/) module, configured from the browser.
+
+## What it does for you
+
+<FeatureGrid items={features} />
+
+<CtaBand
+  title="Start your bot"
+  text="Create the bot in Telegram, download the binary, point it at any node."
+  proxmoxLogo={proxmoxLogo}
+/>
