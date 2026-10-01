@@ -47,6 +47,10 @@ Each one has a long name and a short one; both work. On a phone the short one is
 | `/node-report` | `/nrpt` | `get /nodes/{node}/report` |
 | `/node-vzdump-list` | `/nvlst` | `get /nodes/{node}/storage/{storage}/content vmid:{vmid} content:backup` |
 | `/node-vzdump-config` | `/nvcfg` | `get /nodes/{node}/vzdump/extractconfig volume:{volume}` |
+| `/node-shutdown` | `/nreb` | `create /nodes/{node}/status command:{command}` |
+
+`/node-shutdown` asks for the command: type `reboot` or `shutdown`. `/nodereboot` and `/nodeshutdown` do
+the same with one message less, see [Commands](/cv4pve-botgram/commands/#nodes).
 
 ### VMs and containers
 
@@ -70,6 +74,26 @@ short names starting with `l`). `…` in the path is `qemu` or `lxc`.
 `/vmstart`, `/vmshutdown` and `/vmstop` do the same as the start, shutdown and stop aliases with one tap
 less: they list the guests of the whole cluster, without asking for the node first. See
 [Commands](/cv4pve-botgram/commands/#vms-and-containers).
+
+### Migration and restore
+
+| Alias | Short | Runs |
+|---|---|---|
+| `/qemu-migrate` | `/qmig` | `create /nodes/{node}/qemu/{vmid}/migrate target:{target} online:{online}` |
+| `/lxc-migrate` | `/lmig` | `create /nodes/{node}/lxc/{vmid}/migrate target:{target} restart:{restart}` |
+| `/qemu-vzdump-restore` | `/qvrst` | `create /nodes/{node}/qemu vmid:{vmid} archive:{archive}` |
+| `/lxc-vzdump-restore` | `/lvrst` | `create /nodes/{node}/lxc vmid:{vmid} ostemplate:{archive} restore:1` |
+
+The bot asks you to type the values:
+
+- `target`: the name of the node to migrate to;
+- `online`: `1` for a running VM (live migration), `0` for a stopped one;
+- `restart`: `1` for a running container (it is shut down, moved and started again), `0` for a stopped one;
+- `vmid`: the ID the restored guest gets;
+- `archive`: the volume ID of the backup, as listed by `/nvlst`.
+
+These start a task and answer with its ID: the bot does not wait for the migration or the restore to
+finish.
 
 ## Your own aliases
 

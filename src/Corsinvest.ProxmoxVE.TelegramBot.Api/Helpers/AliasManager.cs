@@ -46,15 +46,15 @@ internal sealed class AliasManager(string fileName)
         new("node-storage,nsto", "Node storage info", "get /nodes/{node}/storage", true),
         new("node-storage-content,nstoc", "Node storage content", "get /nodes/{node}/storage/{storage}/content", true),
         new("node-report,nrpt", "Node report", "get /nodes/{node}/report", true),
-        new("node-shutdown,nreb", "Node reboot or shutdown", "create /nodes/{node}/status command:cmd", true),
-        new("node-vzdump-list,nvlst", "Node list backup", "/get /nodes/{node}/storage/{storage}/content vmid:{vmid} content:backup", true),
+        new("node-shutdown,nreb", "Node reboot or shutdown", "create /nodes/{node}/status command:{command}", true),
+        new("node-vzdump-list,nvlst", "Node list backup", "get /nodes/{node}/storage/{storage}/content vmid:{vmid} content:backup", true),
         new("node-vzdump-config,nvcfg", "Node Extract configuration from vzdump backup archive", "get /nodes/{node}/vzdump/extractconfig volume:{volume}", true),
 
         //Qemu
         new("qemu-list,qlst", "Qemu list vm", "get /nodes/{node}/qemu", true),
         new("qemu-exec,qexe", "Qemu exec command vm", "create /nodes/{node}/qemu/{vmid}/agent/exec command:{command}", true),
-        new("qemu-migrate,qmig", "Qemu migrate vm other node", " get /nodes/{node}/qemu/{vmid}/migrate target:{target}", true),
-        new("qemu-vzdump-restore,qvrst", "Qemu restore vzdump", " create /nodes/{node}/qemu vmid:{vmid} archive:{archive}", true),
+        new("qemu-migrate,qmig", "Qemu migrate vm other node", "create /nodes/{node}/qemu/{vmid}/migrate target:{target} online:{online}", true),
+        new("qemu-vzdump-restore,qvrst", "Qemu restore vzdump", "create /nodes/{node}/qemu vmid:{vmid} archive:{archive}", true),
 
         //status
         new("qemu-status,qsts", "Qemu current status vm", "get /nodes/{node}/qemu/{vmid}/status/current", true),
@@ -72,7 +72,7 @@ internal sealed class AliasManager(string fileName)
 
         //LXC
         new("lxc-list,llst", "LXC list vm", "get /nodes/{node}/lxc", true),
-        new("lxc-migrate,lmig", "LXC migrate vm other node", "get /nodes/{node}/lxc/{vmid}/migrate target:{target}", true),
+        new("lxc-migrate,lmig", "LXC migrate vm other node", "create /nodes/{node}/lxc/{vmid}/migrate target:{target} restart:{restart}", true),
         new("lxc-vzdump-restore,lvrst", "LXC restore vzdump", "create /nodes/{node}/lxc vmid:{vmid} ostemplate:{archive} restore:1", true),
 
         //status
