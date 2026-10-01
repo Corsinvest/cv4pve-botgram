@@ -6,7 +6,7 @@
 using System.CommandLine.Parsing;
 using System.Globalization;
 using Corsinvest.ProxmoxVE.Api;
-using Corsinvest.ProxmoxVE.Api.Extension.Utils;
+using Corsinvest.ProxmoxVE.Api.Extension.Shell;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
 using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot;
@@ -65,21 +65,21 @@ internal abstract class Base : Command
         {
             var resource = cmdArgs[0];
             if (!resource.StartsWith('/')) { resource = "/" + resource; }
-            var requestArgs = ApiExplorerHelper.GetArgumentTags(resource);
+            var requestArgs = ApiCommandLine.GetPlaceholders(resource);
             var parameters = cmdArgs.Skip(1).ToArray();
-            var parametersArgs = parameters.SelectMany(a => ApiExplorerHelper.GetArgumentTags(a)).ToList();
+            var parametersArgs = parameters.SelectMany(ApiCommandLine.GetPlaceholders).ToList();
 
-            if (requestArgs.Length != 0)
+            if (requestArgs.Count != 0)
             {
                 //fix request
-                resource = resource[..(resource.IndexOf(ApiExplorerHelper.CreateArgumentTag(requestArgs[0])) - 1)];
+                resource = resource[..(resource.IndexOf(CreateArgumentTag(requestArgs[0])) - 1)];
 
                 var pveClient = await botManager.GetPveClientAsync();
-                var (Values, Error) = await ApiExplorerHelper.ListValuesAsync(pveClient, await GetClassApiRoot(pveClient), resource);
-                if (!string.IsNullOrWhiteSpace(Error))
+                var children = await ApiSchema.GetChildrenAsync(pveClient, await GetClassApiRoot(pveClient), resource);
+                if (!string.IsNullOrWhiteSpace(children.Error))
                 {
                     //return error
-                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, Error);
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, children.Error);
                     endCommand = true;
                 }
                 else
@@ -88,10 +88,10 @@ internal abstract class Base : Command
 
                     await botManager.BotClient.ChooseInlineKeyboard(message.Chat.Id,
                                                          $"Choose {requestArgs[0]}",
-                                                         Values.Select(a => ("", a.Value, a.Value)));
+                                                         children.Children.Select(a => ("", a.Name, a.Name)));
                 }
             }
-            else if (parametersArgs.Any())
+            else if (parametersArgs.Count != 0)
             {
                 //request parameter value
                 _typeRequest = TypeRequest.ArgParameter;
@@ -99,26 +99,25 @@ internal abstract class Base : Command
                 await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id,
                                                                           $"Insert value for parametr <b>{parametersArgs[0]}</b>");
             }
-            else if (requestArgs.Length == 0)
+            else if (requestArgs.Count == 0)
             {
                 var pveClient = await botManager.GetPveClientAsync();
                 //execute request
-                var (ResultCode, ResultText) = await ApiExplorerHelper.ExecuteAsync(pveClient,
-                                                                                    await GetClassApiRoot(pveClient),
-                                                                                    resource,
-                                                                                    MethodType,
-                                                                                    ApiExplorerHelper.CreateParameterResource(parameters),
-                                                                                    false,
-                                                                                    TableGenerator.Output.Html);
+                var response = await ApiRequest.ExecuteAsync(pveClient, new ApiCommand(MethodType, resource, CreateParameters(parameters)));
 
-                if (ResultCode != 200)
+                if (!response.IsSuccess)
                 {
-                    await botManager.BotClient.SendTextMessageAsync(message.Chat.Id, $"Error: {ResultText}");
+                    var error = string.Join(Environment.NewLine,
+                                            new[] { response.Error ?? string.Empty }
+                                                .Concat(response.ParameterErrors.Select(a => $"{a.Key} : {a.Value}")));
+                    await botManager.BotClient.SendTextMessageAsync(message.Chat.Id, $"Error: {error}");
                 }
                 else
                 {
+                    var table = ApiSchema.ToTable(response.Data, await GetClassApiRoot(pveClient), resource);
+                    var text = table?.To(TableGenerator.Output.Html) ?? (response.Data + string.Empty);
                     var filename = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resource).Replace("/", "-");
-                    await botManager.BotClient.SendDocumentAsyncFromText(message.Chat.Id, ResultText, $"{filename}.html");
+                    await botManager.BotClient.SendDocumentAsyncFromText(message.Chat.Id, text, $"{filename}.html");
                 }
 
                 endCommand = true;
@@ -131,9 +130,27 @@ internal abstract class Base : Command
     }
 
     private void ReplaceArg(string value)
-        => _messageText = _messageText.Replace(
-                            ApiExplorerHelper.CreateArgumentTag(ApiExplorerHelper.GetArgumentTags(_messageText)[0]),
-                            value);
+        => _messageText = _messageText.Replace(CreateArgumentTag(ApiCommandLine.GetPlaceholders(_messageText)[0]), value);
+
+    private static string CreateArgumentTag(string name) => "{" + name + "}";
+
+    //parameters written as key:value
+    private static Dictionary<string, object> CreateParameters(IEnumerable<string> items)
+    {
+        var parameters = new Dictionary<string, object>();
+        foreach (var item in items)
+        {
+            var pos = item.IndexOf(':');
+            if (pos < 0) { continue; }
+
+            var key = item[..pos];
+            if (!parameters.TryAdd(key, item[(pos + 1)..]))
+            {
+                throw new ArgumentException($"Parameter '{key}' is given more than once.");
+            }
+        }
+        return parameters;
+    }
 
     public override async Task<bool> Execute(Message message, BotManager botManager)
     {

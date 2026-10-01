@@ -17,13 +17,6 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api;
 /// <summary>
 /// Bot Manager
 /// </summary>
-/// <remarks>
-/// Constructor
-/// </remarks>
-/// <param name="clientFactory"></param>
-/// <param name="token">Token Telegram Bot</param>
-/// <param name="chatsIdValid">Valid chats Id</param>
-/// <param name="out">Output write</param>
 public class BotManager(Func<Task<PveClient>> clientFactory,
                         string token,
                         long[] chatsIdValid,
@@ -32,7 +25,7 @@ public class BotManager(Func<Task<PveClient>> clientFactory,
     private readonly Dictionary<long, (Message Message, Command Command)> _lastCommandForChat = [];
     private CancellationTokenSource _cts = null!;
     private Dictionary<long, string> _chats = [];
-    internal TelegramBotClient BotClient { get; private set; } = new TelegramBotClient(token);
+    internal TelegramBotClient BotClient { get; } = new TelegramBotClient(token);
 
     /// <summary>
     /// Event raised when a fatal error occurs
@@ -42,8 +35,7 @@ public class BotManager(Func<Task<PveClient>> clientFactory,
     /// <summary>
     /// Get client
     /// </summary>
-    /// <returns></returns>
-    internal async Task<PveClient> GetPveClientAsync() => await clientFactory.Invoke();
+    internal Task<PveClient> GetPveClientAsync() => clientFactory.Invoke();
 
     /// <summary>
     /// Bot Id
@@ -53,15 +45,12 @@ public class BotManager(Func<Task<PveClient>> clientFactory,
     /// <summary>
     /// Chat username
     /// </summary>
-    /// <value></value>
     public string Username { get; private set; } = default!;
 
     /// <summary>
     /// Send message
     /// </summary>
-    /// <param name="chatId"></param>
-    /// <param name="message"></param>
-    public async Task SendMessageAsync(long chatId, string message) => await BotClient.SendTextMessageAsync(chatId, message);
+    public Task SendMessageAsync(long chatId, string message) => BotClient.SendTextMessageAsync(chatId, message);
 
     /// <summary>
     /// Chat info
@@ -71,7 +60,6 @@ public class BotManager(Func<Task<PveClient>> clientFactory,
     /// <summary>
     /// Get info connection
     /// </summary>
-    /// <returns></returns>
     public async Task<string> GetInfoConenctionAsync()
     {
         var client = await GetPveClientAsync();
