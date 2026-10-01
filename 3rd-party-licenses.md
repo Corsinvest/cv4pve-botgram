@@ -6,14 +6,16 @@ However, includes several third-party Open-Source libraries, which are licensed 
 
 ## Libraries directly included
 
-[Corsinvest ProxmoxVE Api](https://github.com/Corsinvest/cv4pve-api-dotnet)
-License: GPLv3
+[Corsinvest.ProxmoxVE.Api.Extension](https://github.com/Corsinvest/cv4pve-api-dotnet)
+License: MIT
 
-[Corsinvest ProxmoxVE Api Extension](https://github.com/Corsinvest/cv4pve-api-dotnet)
-License: GPLv3
-
-[Dotnet Core](https://github.com/dotnet/core)
+[Corsinvest.ProxmoxVE.Api.Console](https://github.com/Corsinvest/cv4pve-api-dotnet)
 License: MIT
 
 [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot)
 License: MIT
+
+## Artwork
+
+The robot pictogram in `icon.svg` / `icon.png` comes from [Lucide](https://lucide.dev) (icon `bot`)
+License: ISC

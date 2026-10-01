@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src\Corsinvest.ProxmoxVE.TelegramBot.Api\Corsinvest.ProxmoxVE.TelegramBot.Api.csproj" />
+    <Project Path="src\Corsinvest.ProxmoxVE.TelegramBot\Corsinvest.ProxmoxVE.TelegramBot.csproj" />
+  </Folder>
+</Solution>
