@@ -16,6 +16,10 @@ optChatToken.Required = true;
 
 var optChatsId = app.AddOption<string>("--chatsId", "Telegram Chats Id valid for communication (comma separated)");
 
+// Deprecated: accepted and ignored, so service units written for older versions still start.
+var optServiceMode = app.AddOption<bool>("--service-mode", "Deprecated: the bot runs as a service natively");
+optServiceMode.Hidden = true;
+
 app.SetAction(async (action, cancellationToken) =>
 {
     var chatIds = new List<long>();
@@ -36,6 +40,7 @@ app.SetAction(async (action, cancellationToken) =>
         Password = app.GetPasswordFromOption(),
         ApiToken = action.GetValue(app.GetApiTokenOption()),
         ValidateCertificate = action.GetValue(app.GetValidateCertificateOption()),
+        DeprecatedServiceMode = action.GetValue(optServiceMode),
     };
 
     // A plain HostBuilder, not Host.CreateDefaultBuilder: no appsettings.json and no file watcher on the

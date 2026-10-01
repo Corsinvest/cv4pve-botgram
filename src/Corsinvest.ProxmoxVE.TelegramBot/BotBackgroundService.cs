@@ -25,6 +25,11 @@ internal sealed class BotBackgroundService(ILogger<BotBackgroundService> logger,
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        if (options.DeprecatedServiceMode)
+        {
+            logger.LogWarning("--service-mode is deprecated and ignored: the bot runs as a service natively. Remove it, it will be dropped in the next major version.");
+        }
+
         try
         {
             // A Windows service has no console: what the bot writes goes to the log, so to the Event Log.
