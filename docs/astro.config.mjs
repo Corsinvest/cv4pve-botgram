@@ -31,7 +31,11 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Start here',
-          items: ['getting-started', 'telegram-bot', 'permissions', 'connection', 'service', 'troubleshooting'],
+          items: ['getting-started', 'permissions', 'connection', 'troubleshooting'],
+        },
+        {
+          label: 'Integration',
+          items: ['telegram-bot', 'service'],
         },
         {
           label: 'Commands',

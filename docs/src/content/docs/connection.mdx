@@ -15,13 +15,13 @@ first: see [Permissions](/cv4pve-botgram/permissions/).
 
 ## Options in a file
 
-The bot runs with the same options every time, and two of them are secrets: keep them in a file readable
-only by the account that runs the bot, not on the command line of a service.
+The bot runs as a service and starts with the same options every time, and two of them are secrets: keep
+them in a file readable only by the service, as [Run as a service](/cv4pve-botgram/service/) does.
 
 <CliResponseFiles
   tool="cv4pve-botgram"
   user="bot@pve"
   token="bot"
   extra={['# Telegram bot, see Telegram bot', '--token=<telegram-bot-token>', '--chatsId=123456789,987654321']}
-  run="--service-mode"
+  run=""
 />

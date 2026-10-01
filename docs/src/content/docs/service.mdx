@@ -1,85 +1,141 @@
 ---
 title: Run as a service
-description: Console mode and service mode of cv4pve-botgram, and how to run it under systemd or as a Windows service.
+description: Run cv4pve-botgram permanently with systemd on Linux or as a Windows service, no wrapper needed.
 ---
 
-The bot is useful only while it runs. Started from a terminal it stops when the terminal closes: for
-everyday use run it as a service, so it starts with the machine and comes back after a failure.
+import { Steps } from '@astrojs/starlight/components';
 
-## Console and service mode
+The bot is useful only while it runs, so it has to run permanently and start again after a reboot. The
+binary integrates with both service managers by itself: it tells systemd when it is ready
+(`Type=notify`) and runs as a native Windows service, with no wrapper such as NSSM.
 
-| | Console mode (default) | Service mode (`--service-mode`) |
-|---|---|---|
-| Stops | when you press Enter | when the process is stopped (Ctrl+C, `systemctl stop`, service stop) |
-| Needs a terminal | yes | no |
-| Output | console | console, collected by systemd or the service manager |
-| For | first tests | everyday use |
+Keep the options out of the command line: put them in an
+[options file](/cv4pve-botgram/connection/#options-in-a-file) readable only by the service, so the two
+tokens do not appear in the process list or in the unit.
 
-In both modes the bot writes every message it receives to the console: date, chat ID, user and text.
+## Linux (systemd)
 
-## Options file
+<Steps>
 
-Keep the options, with the two tokens, in a file readable only by the account that runs the bot, as
-described in [Options in a file](/cv4pve-botgram/connection/#options-in-a-file):
+1. Install the binary: with the zip, copy `cv4pve-botgram` to `/usr/local/bin`.
 
-```text
-# /etc/cv4pve/botgram.rsp
---host=pve01,pve02,pve03
---api-token=bot@pve!bot=<uuid>
---token=<telegram-bot-token>
---chatsId=123456789
-```
+2. Create a user for the service, with no shell. It needs a home folder: the bot keeps your
+   [aliases](/cv4pve-botgram/commands/aliases/#where-aliases-are-kept) there.
 
-## Linux: systemd
+   ```bash
+   sudo useradd --system --create-home --shell /usr/sbin/nologin cv4pve-botgram
+   ```
 
-Create a dedicated account with a home folder (the bot keeps your [aliases](/cv4pve-botgram/commands/aliases/)
-there) and protect the options file:
+3. Create the configuration folder and the file with the options:
+
+   ```bash
+   sudo install -d -m 750 -o root -g cv4pve-botgram /etc/cv4pve-botgram
+   cd /etc/cv4pve-botgram
+   sudo tee connection.conf > /dev/null <<'EOF'
+   --host=pve1.local,pve2.local
+   --api-token=bot@pve!bot=<uuid>
+   --token=<telegram-bot-token>
+   --chatsId=123456789
+   EOF
+   sudo chown root:cv4pve-botgram connection.conf
+   sudo chmod 640 connection.conf
+   ```
+
+   In the file the tokens need no quotes.
+
+4. Create `/etc/systemd/system/cv4pve-botgram.service`:
+
+   ```ini
+   [Unit]
+   Description=cv4pve-botgram - Telegram bot for Proxmox VE
+   Wants=network-online.target
+   After=network-online.target
+
+   [Service]
+   Type=notify
+   User=cv4pve-botgram
+   Group=cv4pve-botgram
+   ExecStart=/usr/local/bin/cv4pve-botgram @/etc/cv4pve-botgram/connection.conf
+   Restart=on-failure
+   RestartSec=10
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+5. Start it, and enable it at boot:
+
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now cv4pve-botgram
+   systemctl status cv4pve-botgram
+   ```
+
+   Then send `/help` to the bot from Telegram.
+
+</Steps>
+
+`Type=notify` makes `systemctl start` return only once the bot is logged in to Proxmox VE and to
+Telegram, and `Restart=on-failure` starts it again if it stops with an error, for example when the
+cluster cannot be reached at boot. Use an absolute path for the options file in `ExecStart`: it is not
+looked up in the folder of the binary.
+
+The output goes to the journal, with every message the bot receives (date, chat ID, user and text):
 
 ```bash
-sudo useradd --system --create-home cv4pve
-sudo chown cv4pve /etc/cv4pve/botgram.rsp
-sudo chmod 600 /etc/cv4pve/botgram.rsp
+journalctl -u cv4pve-botgram -f
 ```
 
-`/etc/systemd/system/cv4pve-botgram.service`:
+To change an option, edit the file and run `sudo systemctl restart cv4pve-botgram`: the options are
+read only at start.
 
-```ini
-[Unit]
-Description=cv4pve-botgram, Telegram bot for Proxmox VE
-After=network-online.target
-Wants=network-online.target
+## Windows (service)
 
-[Service]
-ExecStart=/usr/local/bin/cv4pve-botgram @/etc/cv4pve/botgram.rsp --service-mode
-User=cv4pve
-Restart=always
-RestartSec=10
+<Steps>
 
-[Install]
-WantedBy=multi-user.target
-```
+1. Unzip `cv4pve-botgram.exe-win-x64.zip` into a folder for all users, e.g.
+   `C:\Program Files\cv4pve-botgram`. The WinGet package installs per user, in a folder the service
+   account does not use.
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now cv4pve-botgram
+2. Create the file with the options, in an administrator PowerShell:
 
-sudo systemctl status cv4pve-botgram     # is it running
-sudo journalctl -u cv4pve-botgram -f     # what it logs
-```
+   ```powershell
+   $dir = 'C:\ProgramData\cv4pve-botgram'
+   New-Item -ItemType Directory -Force $dir | Out-Null
+   Set-Content "$dir\connection.conf" "--host=pve1.local,pve2.local`n--api-token=bot@pve!bot=<uuid>`n--token=<telegram-bot-token>`n--chatsId=123456789"
+   ```
 
-Change the path in `ExecStart` to where you put the binary.
+   Then restrict `C:\ProgramData\cv4pve-botgram` to Administrators and SYSTEM: the file holds the tokens.
 
-## Windows: service with NSSM
+3. Create and start the service:
 
-Windows cannot run a console program as a service by itself. [NSSM](https://nssm.cc/download) wraps it:
+   ```powershell
+   New-Service -Name cv4pve-botgram -DisplayName 'cv4pve-botgram' -StartupType Automatic -BinaryPathName '"C:\Program Files\cv4pve-botgram\cv4pve-botgram.exe" @C:\ProgramData\cv4pve-botgram\connection.conf'
+   Start-Service cv4pve-botgram
+   ```
+
+   `New-Service` works the same in Windows PowerShell 5.1 and PowerShell 7. The quotes around the
+   path of the executable are needed because of the space in `Program Files`.
+
+   Then send `/help` to the bot from Telegram.
+
+</Steps>
+
+The service runs as `LocalSystem`. Your aliases are kept in the profile of the service account, not in
+yours.
+
+To change an option, edit the file and run `Restart-Service cv4pve-botgram`: the options are read only
+at start.
+
+A service has no console. Errors go to the Windows Event Log: *Event Viewer → Windows Logs →
+Application*, source `cv4pve-botgram`. To see why the service does not start, stop it and run the same
+command line in a console.
+
+To remove the service:
 
 ```powershell
-nssm install cv4pve-botgram "C:\Tools\cv4pve-botgram\cv4pve-botgram.exe" "@C:\Tools\cv4pve-botgram\botgram.rsp" --service-mode
-nssm start cv4pve-botgram
-
-nssm status cv4pve-botgram
-nssm stop cv4pve-botgram
-nssm remove cv4pve-botgram confirm
+Stop-Service cv4pve-botgram
+sc.exe delete cv4pve-botgram
 ```
 
 ## One bot, one process
@@ -90,6 +146,13 @@ same `--token` take the messages away from each other: run one process per bot, 
 
 ## When the bot stops by itself
 
-If Telegram refuses the token (HTTP 401, 403 or 404), the bot cannot work: it writes `FATAL ERROR` with
-the reason and exits. Fix `--token` before starting it again; with `Restart=always` systemd would
-otherwise restart it in a loop. Any other Telegram error is written to the log and the bot keeps running.
+The bot exits with an error, code 1, when it cannot work:
+
+- at start, if it cannot log in to Proxmox VE or to Telegram: `Cannot start the Telegram bot` with the
+  reason;
+- while running, if Telegram refuses the token (HTTP 401, 403 or 404): `FATAL ERROR` with the reason.
+
+With `Restart=on-failure` systemd starts it again after 10 seconds, which is what you want for a cluster
+that was unreachable at boot. For a wrong token it keeps restarting until you fix the options file: the
+journal shows the reason each time. Any other Telegram error is written to the log and the bot keeps
+running.

@@ -67,7 +67,7 @@ Bot   (a file with the status of VM 100)
 - **Placeholders**: leave `{node}` or `{vmid}` in a path and the bot offers the values that exist; leave one in a parameter and it asks you to type it.
 - **Aliases**: short names for the calls you repeat. Many are built in for cluster, nodes, VMs and containers, and you add your own from the chat.
 - **Only your chats**: the bot answers only the chat IDs you list; any other chat is refused and logged.
-- **Runs as a service**: one self-contained binary for Linux, Windows and macOS, under systemd or as a Windows service.
+- **Runs as a service**: one self-contained binary for Linux, Windows and macOS, a native systemd (`Type=notify`) and Windows service, with no wrapper.
 - **Keeps running with a node down**: give it more than one host and it uses the first that answers.
 
 ---
@@ -98,7 +98,7 @@ Then send `/help` to your bot. The Telegram token comes from BotFather, see [Tel
 | [Telegram bot](https://corsinvest.github.io/cv4pve-botgram/telegram-bot/) | Creating the bot with BotFather, restricting it to your chats |
 | [Permissions](https://corsinvest.github.io/cv4pve-botgram/permissions/) | The user, the API token and the privileges of each command |
 | [Connection](https://corsinvest.github.io/cv4pve-botgram/connection/) | Hosts, credentials, certificates, options in a file |
-| [Run as a service](https://corsinvest.github.io/cv4pve-botgram/service/) | Console and service mode, systemd, Windows service |
+| [Run as a service](https://corsinvest.github.io/cv4pve-botgram/service/) | systemd on Linux, a service on Windows, no wrapper needed |
 | [Commands](https://corsinvest.github.io/cv4pve-botgram/commands/) | Guests, nodes, and how a conversation with the bot works |
 | [API commands](https://corsinvest.github.io/cv4pve-botgram/commands/api/) | `/get`, `/set`, `/create`, `/delete`, placeholders, `/usage` |
 | [Aliases](https://corsinvest.github.io/cv4pve-botgram/commands/aliases/) | The built-in aliases and how to add your own |

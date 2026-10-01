@@ -7,17 +7,20 @@ import CliTroubleshooting from '@corsinvest/cv4pve-docs-theme/components/CliTrou
 
 ## The bot does not answer
 
-Look at the console of the bot, or at its log when it runs [as a service](/cv4pve-botgram/service/): every
+Look at the console of the bot, or at the journal or the Windows Event Log when it runs
+[as a service](/cv4pve-botgram/service/): every
 message it receives is written there with the chat ID and the text.
 
 - **Nothing is logged when you write to the bot**: the messages do not reach this process. Check that
   `--token` is the token of the bot you are writing to, that the machine reaches Telegram on the Internet,
   and that no other process runs with the same token, see
   [One bot, one process](/cv4pve-botgram/service/#one-bot-one-process).
+- **`Cannot start the Telegram bot` and the bot exits**: at start it logs in to Proxmox VE, then to
+  Telegram, and the message gives the reason. `No reachable hosts` or `Authentication failed` is about
+  `--host` or the credentials, see [Connection](/cv4pve-botgram/connection/); an error of Telegram is
+  about `--token`.
 - **`FATAL ERROR` and the bot exits**: Telegram refused the token (HTTP 401, 403 or 404). Get the token
   again from BotFather, see [Telegram bot](/cv4pve-botgram/telegram-bot/).
-- **The bot does not start at all**: it logs in to Proxmox VE first. An error here is about `--host` or
-  the credentials, see [Connection](/cv4pve-botgram/connection/).
 
 ## What the answers mean
 

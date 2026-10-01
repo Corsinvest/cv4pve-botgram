@@ -9,18 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-// Parse command line arguments using ConsoleHelper
 var app = ConsoleHelper.CreateApp("Telegram bot for Proxmox VE");
 
 var optChatToken = app.AddOption<string>("--token", "Telegram API token bot");
 optChatToken.Required = true;
 
 var optChatsId = app.AddOption<string>("--chatsId", "Telegram Chats Id valid for communication (comma separated)");
-var optServiceMode = app.AddOption<bool>("--service-mode", "Run as background service (no console interaction)");
 
-app.SetAction(async (action) =>
+app.SetAction(async (action, cancellationToken) =>
 {
-    // Parse chat IDs
     var chatIds = new List<long>();
     foreach (var chatId in (action.GetValue(optChatsId) + "").Split(",", StringSplitOptions.RemoveEmptyEntries))
     {
@@ -30,61 +27,45 @@ app.SetAction(async (action) =>
         }
     }
 
-    // Create host builder with dependency injection
-    var hostBuilder = Host.CreateDefaultBuilder()
-        .ConfigureLogging(logging =>
-        {
-            logging.ClearProviders();
-            logging.AddConsole();
-
-            // Apply same filtering as ConsoleHelper.CreateLoggerFactory
-            var logLevel = app.GetLogLevelFromDebug();
-            logging.AddFilter("Microsoft", LogLevel.Warning);
-            logging.AddFilter("System", LogLevel.Warning);
-            logging.AddFilter("Corsinvest.ProxmoxVE.Api.PveClientBase", logLevel);
-            logging.SetMinimumLevel(logLevel);
-        })
-        .ConfigureServices((_, services) =>
-        {
-            // Register bot configuration options
-            services.AddSingleton(new BotServiceOptions
-            {
-                ChatToken = action.GetValue(optChatToken)!,
-                ChatIds = chatIds,
-                Host = action.GetValue(app.GetHostOption())!,
-                Username = action.GetValue(app.GetUsernameOption())!,
-                Password = app.GetPasswordFromOption(),
-                ApiToken = action.GetValue(app.GetApiTokenOption()),
-                ValidateCertificate = action.GetValue(app.GetValidateCertificateOption()),
-                ServiceMode = action.GetValue(optServiceMode)
-            });
-
-            // Register the bot background service
-            services.AddHostedService<BotBackgroundService>();
-        });
-
-    var host = hostBuilder.Build();
-
-    // Run in appropriate mode
-    if (!action.GetValue(optServiceMode))
+    var options = new BotServiceOptions
     {
-        // Console mode - allow manual stop with Enter key
-        await host.StartAsync();
+        ChatToken = action.GetValue(optChatToken)!,
+        ChatIds = chatIds,
+        Host = action.GetValue(app.GetHostOption())!,
+        Username = action.GetValue(app.GetUsernameOption())!,
+        Password = app.GetPasswordFromOption(),
+        ApiToken = action.GetValue(app.GetApiTokenOption()),
+        ValidateCertificate = action.GetValue(app.GetValidateCertificateOption()),
+    };
 
-        Console.WriteLine("Bot is running. Press Enter to stop...");
-        Console.ReadLine();
+    // A plain HostBuilder, not Host.CreateDefaultBuilder: no appsettings.json and no file watcher on the
+    // content root, which under systemd is "/" and would be watched recursively.
+    var host = new HostBuilder()
+                   .UseSystemd()
+                   .UseWindowsService()
+                   .ConfigureLogging(logging =>
+                   {
+                       // UseWindowsService adds the Event Log when running as a Windows service.
+                       logging.AddConsole();
 
-        Console.WriteLine("Stopping bot...");
-        await host.StopAsync(TimeSpan.FromSeconds(10));
-    }
-    else
-    {
-        // Service mode - run indefinitely until process is killed
-        await host.RunAsync();
-    }
+                       var logLevel = app.GetLogLevelFromDebug();
+                       logging.AddFilter("Microsoft", LogLevel.Warning);
+                       logging.AddFilter("System", LogLevel.Warning);
+                       logging.AddFilter("Corsinvest.ProxmoxVE.Api.PveClientBase", logLevel);
+                       logging.SetMinimumLevel(logLevel);
+                   })
+                   .ConfigureServices((_, services) =>
+                   {
+                       services.AddSingleton(options);
+                       services.AddHostedService<BotBackgroundService>();
+                   })
+                   .Build();
+
+    // Ctrl+C and SIGTERM cancel the token: the host stops cleanly and the process exits with 0.
+    await host.RunAsync(cancellationToken);
+    return options.ExitCode;
 });
 
 var loggerFactory = ConsoleHelper.CreateLoggerFactory<Program>(app.GetLogLevelFromDebug());
 
 return await app.ExecuteAppAsync(args, loggerFactory.CreateLogger<Program>());
-

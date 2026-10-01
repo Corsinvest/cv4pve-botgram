@@ -38,9 +38,10 @@ Telegram
   Bot UserId: @123456789
 Proxmox VE
   pve1.local:8006
+Press Ctrl+C to stop.
 ```
 
-It keeps running until you press Enter. Open the chat with your bot in Telegram and send `/help`: the bot answers with the list of its commands,
+It stays in the foreground until it is stopped. Open the chat with your bot in Telegram and send `/help`: the bot answers with the list of its commands,
 described in [Commands](/cv4pve-botgram/commands/).
 
 ## Options
@@ -49,7 +50,9 @@ described in [Commands](/cv4pve-botgram/commands/).
 |---|---|
 | `--token` | Token of the Telegram bot, from BotFather. Required. |
 | `--chatsId` | Telegram chat IDs allowed to use the bot, separated by commas. See [Restrict the bot to your chats](/cv4pve-botgram/telegram-bot/#restrict-the-bot-to-your-chats). |
-| `--service-mode` | Runs until the process is stopped, without waiting for Enter: for systemd and Windows services, see [Run as a service](/cv4pve-botgram/service/). |
+
+The bot runs until it is stopped: Ctrl+C in a terminal, `systemctl stop`, or the Windows service manager.
+To keep it running after you close the terminal, see [Run as a service](/cv4pve-botgram/service/).
 
 Host, API token, username and password, certificates and keeping the options in a file: see
 [Connection](/cv4pve-botgram/connection/).
