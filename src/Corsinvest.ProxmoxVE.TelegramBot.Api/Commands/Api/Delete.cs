@@ -9,6 +9,6 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands.Api;
 internal class Delete : Base
 {
     public override string Name => "delete";
-    public override string Description => "Get from resource and result to file";
+    public override string Description => "Delete from resource and result to file";
     protected override MethodType MethodType => MethodType.Delete;
 }

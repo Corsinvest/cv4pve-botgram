@@ -23,12 +23,14 @@ internal abstract class Base : Command
         if (string.IsNullOrWhiteSpace(callbackQuery.Data)) { return true; }
 
         var action = ForReboot ? "reboot" : "shutdown";
-        await (await botManager.GetPveClientAsync()).Nodes[callbackQuery.Data].Status.NodeCmd(action);
+        var error = (await (await botManager.GetPveClientAsync()).Nodes[callbackQuery.Data].Status.NodeCmd(action)).GetErrorText();
 
         if (callbackQuery.Message != null)
         {
             await botManager.BotClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
-                                                                      $"Node {callbackQuery.Data} action {action}!");
+                                                                      error == null
+                                                                        ? $"Node {callbackQuery.Data} action {action}!"
+                                                                        : $"Error: {error}");
         }
 
         return true;

@@ -157,9 +157,10 @@ internal abstract class Base : Command
         switch (_typeRequest)
         {
             case TypeRequest.Start:
-                _messageText = message.Text!;
-                var args = CommandLineParser.SplitCommandLine(_messageText).ToList();
-                if (args.Count > 1) { _messageText = string.Join(" ", [.. args.Skip(1)]); }
+                //text after the command name, empty asks for the resource
+                var text = message.Text!.Trim();
+                var pos = text.IndexOf(' ');
+                _messageText = pos < 0 ? string.Empty : text[(pos + 1)..].Trim();
                 break;
 
             case TypeRequest.Resource: _messageText = message.Text!; break;
