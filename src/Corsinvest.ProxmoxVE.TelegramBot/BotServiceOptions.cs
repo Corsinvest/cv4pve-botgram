@@ -3,6 +3,8 @@
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
+namespace Corsinvest.ProxmoxVE.TelegramBot;
+
 internal sealed class BotServiceOptions
 {
     public string ChatToken { get; set; } = string.Empty;
@@ -14,4 +16,3 @@ internal sealed class BotServiceOptions
     public bool ValidateCertificate { get; set; }
     public bool ServiceMode { get; set; }
 }
-

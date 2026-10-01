@@ -14,6 +14,9 @@ jobs:
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
       WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
     with:
       project-name: cv4pve-botgram
       project-path: src/Corsinvest.ProxmoxVE.TelegramBot/Corsinvest.ProxmoxVE.TelegramBot.csproj

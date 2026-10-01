@@ -1,9 +1,8 @@
-﻿/*
+/*
  * SPDX-License-Identifier: GPL-3.0-only
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using Corsinvest.ProxmoxVE.Api.Extension.Utils;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
 using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot.Types;
@@ -22,16 +21,13 @@ internal class Alias : Command
     }
 
     private RequestType _requestType = RequestType.Action;
-    private readonly ApiExplorerHelper.AliasManager _aliasManager;
+    private readonly AliasManager _aliasManager;
     private string _name = string.Empty;
     private string _description = string.Empty;
 
     public Alias()
     {
-        _aliasManager = new ApiExplorerHelper.AliasManager
-        {
-            FileName = Path.Combine(CommonHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt")
-        };
+        _aliasManager = new AliasManager(Path.Combine(CommonHelper.GetApplicationDataDirectory("cv4pve-botgram"), "alias.txt"));
         _aliasManager.Load();
     }
 
@@ -81,13 +77,13 @@ internal class Alias : Command
         switch (_requestType)
         {
             case RequestType.Action:
-                await botManager.BotClient.ChooseInlineKeyboard(message.Chat.Id, "Choose action", new[] { "List", "Delete", "Create" });
+                await botManager.BotClient.ChooseInlineKeyboard(message.Chat.Id, "Choose action", ["List", "Delete", "Create"]);
                 break;
 
             case RequestType.DeleteRequestName:
-                if (_aliasManager.Exists(message.Text))
+                if (_aliasManager.Exists(message.Text!))
                 {
-                    _aliasManager.Remove(message.Text);
+                    _aliasManager.Remove(message.Text!);
                 }
                 else
                 {

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * SPDX-License-Identifier: GPL-3.0-only
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
@@ -79,17 +79,17 @@ public abstract class Command
     /// <param name="callbackQuery"></param>
     /// <param name="botManager"></param>
     /// <returns></returns>
-    public virtual async Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
-        => await Task.FromResult(true);
+    public virtual Task<bool> Execute(Message message, CallbackQuery callbackQuery, BotManager botManager)
+        => Task.FromResult(true);
 
     internal static Command GetCommand(string messageText)
     {
         Command command = null!;
 
-        if (messageText.Trim().StartsWith("/"))
+        if (messageText.Trim().StartsWith('/'))
         {
             var name = messageText.Trim()[1..];
-            var pos = name.IndexOf(" ");
+            var pos = name.IndexOf(' ');
             if (pos > 0) { name = name[..pos]; }
 
             command = GetCommands().FirstOrDefault(a => a.Names.Contains(name) || name == a.Name)!;

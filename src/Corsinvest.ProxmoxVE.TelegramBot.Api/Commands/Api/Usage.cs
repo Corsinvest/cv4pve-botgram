@@ -3,7 +3,7 @@
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using Corsinvest.ProxmoxVE.Api.Extension.Utils;
+using Corsinvest.ProxmoxVE.Api.Extension.Shell;
 using Corsinvest.ProxmoxVE.Api.Shared.Utils;
 using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot.Types;
@@ -33,12 +33,11 @@ internal class Usage : Command
                 break;
 
             case TypeRequest.Resource:
-                var ret = ApiExplorerHelper.Usage(await GetClassApiRoot(await botManager.GetPveClientAsync()),
-                                                  message.Text!.Trim(),
-                                                  TableGenerator.Output.Html,
-                                                  true,
-                                                  null,
-                                                  true);
+                var resource = message.Text!.Trim();
+                var methods = ApiSchema.GetMethods(await GetClassApiRoot(await botManager.GetPveClientAsync()), resource);
+                var ret = methods == null
+                            ? $"no such resource '{resource}'{Environment.NewLine}"
+                            : ApiSchemaText.Usage(resource, methods, true, true, TableGenerator.Output.Html, false);
 
                 await botManager.BotClient.SendDocumentAsyncFromText(message.Chat.Id, ret, "Usage.html");
                 endCommand = true;

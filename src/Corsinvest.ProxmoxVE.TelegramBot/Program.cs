@@ -1,15 +1,16 @@
-﻿/*
+/*
  * SPDX-License-Identifier: GPL-3.0-only
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
 using Corsinvest.ProxmoxVE.Api.Console.Helpers;
+using Corsinvest.ProxmoxVE.TelegramBot;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 // Parse command line arguments using ConsoleHelper
-var app = ConsoleHelper.CreateApp("cv4pve-botgram", "Telegram bot for Proxmox VE");
+var app = ConsoleHelper.CreateApp("Telegram bot for Proxmox VE");
 
 var optChatToken = app.AddOption<string>("--token", "Telegram API token bot");
 optChatToken.Required = true;
@@ -43,7 +44,7 @@ app.SetAction(async (action) =>
             logging.AddFilter("Corsinvest.ProxmoxVE.Api.PveClientBase", logLevel);
             logging.SetMinimumLevel(logLevel);
         })
-        .ConfigureServices((context, services) =>
+        .ConfigureServices((_, services) =>
         {
             // Register bot configuration options
             services.AddSingleton(new BotServiceOptions
@@ -65,7 +66,7 @@ app.SetAction(async (action) =>
     var host = hostBuilder.Build();
 
     // Run in appropriate mode
-    if (action.GetValue(optServiceMode) == false)
+    if (!action.GetValue(optServiceMode))
     {
         // Console mode - allow manual stop with Enter key
         await host.StartAsync();
@@ -82,7 +83,6 @@ app.SetAction(async (action) =>
         await host.RunAsync();
     }
 });
-
 
 var loggerFactory = ConsoleHelper.CreateLoggerFactory<Program>(app.GetLogLevelFromDebug());
 

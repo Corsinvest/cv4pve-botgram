@@ -1,4 +1,4 @@
-﻿/*
+/*
  * SPDX-License-Identifier: GPL-3.0-only
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
@@ -16,13 +16,13 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 
 internal static class BotHelper
 {
-    public static async Task<Message> SendTextMessageAsyncNoKeyboard(this TelegramBotClient botClient,
-                                                                     long chatId,
-                                                                     string text)
-        => await botClient.SendTextMessageAsync(chatId: chatId,
-                                                text: text,
-                                                parseMode: ParseMode.Html,
-                                                replyMarkup: new ReplyKeyboardRemove());
+    public static Task<Message> SendTextMessageAsyncNoKeyboard(this TelegramBotClient botClient,
+                                                               long chatId,
+                                                               string text)
+        => botClient.SendTextMessageAsync(chatId: chatId,
+                                          text: text,
+                                          parseMode: ParseMode.Html,
+                                          replyMarkup: new ReplyKeyboardRemove());
 
     public static async Task<Message> SendDocumentAsyncFromText(this TelegramBotClient botClient,
                                                                 long chatId,
@@ -30,7 +30,7 @@ internal static class BotHelper
                                                                 string fileName)
     {
 
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+        await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
         return await botClient.SendDocumentAsync(chatId, InputFile.FromStream(stream, fileName));
     }
 
@@ -58,11 +58,11 @@ internal static class BotHelper
         return ikb;
     }
 
-    public static async Task ChooseInlineKeyboard(this TelegramBotClient botClient,
-                                                  long chatId,
-                                                  string title,
-                                                  string[] items)
-        => await botClient.ChooseInlineKeyboard(chatId, title, items.Select(a => ("", a, a)));
+    public static Task ChooseInlineKeyboard(this TelegramBotClient botClient,
+                                            long chatId,
+                                            string title,
+                                            string[] items)
+        => botClient.ChooseInlineKeyboard(chatId, title, items.Select(a => ("", a, a)));
 
     public static async Task ChooseInlineKeyboard(this TelegramBotClient botClient,
                                                   long chatId,

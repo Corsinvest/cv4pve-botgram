@@ -1,35 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-		<OutputType>Library</OutputType>
-		<Description>Telegram Bot API library for Proxmox VE management</Description>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <OutputType>Library</OutputType>
+        <Product>Corsinvest for Proxmox VE Telegram Bot Api</Product>
+        <AssemblyTitle>Corsinvest for Proxmox VE Telegram Bot Api</AssemblyTitle>
+        <Description>Telegram Bot API library for Proxmox VE management</Description>
+        <PackageTags>ProxmoxVE;Api;Client;Rest;Corsinvest;Botgram;Telegram</PackageTags>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-		<PackageProjectUrl>https://github.com/Corsinvest/cv4pve-botgram</PackageProjectUrl>
-		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>ProxmoxVE;Api;Client;Rest;Corsinvest;Botgram;Telegram</PackageTags>
-		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/Corsinvest/cv4pve-botgram</RepositoryUrl>
+        <!-- Local test feed: every build drops the package in ProxmoxVE\.nupkgs -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageOutputPath>..\..\..\.nupkgs\</PackageOutputPath>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-
-		<!-- Include symbol files (*.pdb) in the built .nupkg -->
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<None Include="..\..\LICENSE.md" Pack="true" PackagePath="\" />
-		<None Include="..\..\icon.png" Pack="true" PackagePath="\" />
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" />
-		<PackageReference Include="Telegram.Bot" />
-	</ItemGroup>
+        <!-- Symbols: PDB inside the .nupkg (local debugging) and .snupkg for nuget.org -->
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="..\..\icon.png" Pack="true" PackagePath="" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Corsinvest.ProxmoxVE.Api.Extension" />
+        <PackageReference Include="Telegram.Bot" />
+    </ItemGroup>
 </Project>

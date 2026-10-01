@@ -8,11 +8,12 @@ using Corsinvest.ProxmoxVE.TelegramBot.Api;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-internal sealed class BotBackgroundService(
-    ILogger<BotBackgroundService> logger,
-    ILoggerFactory loggerFactory,
-    BotServiceOptions options,
-    IHostApplicationLifetime appLifetime) : BackgroundService
+namespace Corsinvest.ProxmoxVE.TelegramBot;
+
+internal sealed class BotBackgroundService(ILogger<BotBackgroundService> logger,
+                                           ILoggerFactory loggerFactory,
+                                           BotServiceOptions options,
+                                           IHostApplicationLifetime appLifetime) : BackgroundService
 {
     private readonly ILoggerFactory _loggerFactory = loggerFactory;
     private BotManager? _botManager;
@@ -37,8 +38,7 @@ internal sealed class BotBackgroundService(
             // Subscribe to fatal error events
             _botManager.FatalError += OnFatalError;
 
-            logger.LogInformation("Starting Telegram bot in {Mode} mode...",
-                options.ServiceMode ? "service" : "console");
+            logger.LogInformation("Starting Telegram bot in {Mode} mode...", options.ServiceMode ? "service" : "console");
             logger.LogInformation("Authorized chats: {ChatIds}", string.Join(", ", options.ChatIds));
 
             await _botManager.StartReceiving();

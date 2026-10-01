@@ -3,7 +3,7 @@
  * SPDX-FileCopyrightText: Copyright Corsinvest Srl
  */
 
-using Corsinvest.ProxmoxVE.Api.Extension.Utils;
+using Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -11,10 +11,10 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands;
 
 internal class AliasCommand : Command
 {
-    private readonly ApiExplorerHelper.AliasDef _aliasDef;
+    private readonly AliasDef _aliasDef;
     private Command? _commandRef;
 
-    public AliasCommand(ApiExplorerHelper.AliasDef aliasDef)
+    public AliasCommand(AliasDef aliasDef)
     {
         _aliasDef = aliasDef;
         Names.AddRange(aliasDef.Names);
@@ -30,7 +30,7 @@ internal class AliasCommand : Command
         {
             //command reference
             var command = _aliasDef.Command;
-            if (!command.StartsWith("/")) { command = "/" + command; }
+            if (!command.StartsWith('/')) { command = "/" + command; }
             var name = command.Trim().Split(' ')[0];
             _commandRef = message.Type == MessageType.Text ? GetCommand(name) : null;
 

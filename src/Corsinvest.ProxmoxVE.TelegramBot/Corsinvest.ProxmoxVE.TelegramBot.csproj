@@ -4,7 +4,10 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<AssemblyName>cv4pve-botgram</AssemblyName>
 		<Product>Corsinvest for Proxmox VE Telegram Bot</Product>
-		<Description>Telegram Bot for Proxmox VE management</Description>
+		<AssemblyTitle>Corsinvest for Proxmox VE Telegram Bot</AssemblyTitle>
+		<Description>Telegram bot for Proxmox VE: manage and monitor your cluster via Telegram</Description>
+		<ApplicationIcon>..\..\icon.ico</ApplicationIcon>
+		<IsPackable>false</IsPackable>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<PredefinedCulturesOnly>false</PredefinedCulturesOnly>
 	</PropertyGroup>
