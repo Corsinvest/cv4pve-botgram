@@ -1,0 +1,27 @@
+---
+title: Connection
+description: How cv4pve-botgram connects to a Proxmox VE cluster, and how to keep the options in a file.
+---
+
+import CliConnection from '@corsinvest/cv4pve-docs-theme/components/CliConnection.astro';
+import CliResponseFiles from '@corsinvest/cv4pve-docs-theme/components/CliResponseFiles.astro';
+
+cv4pve-botgram talks to the Proxmox VE REST API of any node of the cluster. Create the user and API token
+first: see [Permissions](/cv4pve-botgram/permissions/).
+
+## Options
+
+<CliConnection user="bot@pve" />
+
+## Options in a file
+
+The bot runs as a service and starts with the same options every time, and two of them are secrets: keep
+them in a file readable only by the service, as [Run as a service](/cv4pve-botgram/service/) does.
+
+<CliResponseFiles
+  tool="cv4pve-botgram"
+  user="bot@pve"
+  token="bot"
+  extra={['# Telegram bot, see Telegram bot', '--token=<telegram-bot-token>', '--chatsId=123456789,987654321']}
+  run=""
+/>

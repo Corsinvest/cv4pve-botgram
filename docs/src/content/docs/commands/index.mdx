@@ -1,0 +1,74 @@
+---
+title: Commands
+description: The commands of cv4pve-botgram, how a conversation with the bot works, and the commands for VMs, containers and nodes.
+---
+
+Send `/help` to the bot for the list of its commands.
+
+| Command | What it does |
+|---|---|
+| `/help` | Lists the commands. |
+| `/vmstart` | Starts a VM or container. |
+| `/vmshutdown` | Shuts down a VM or container cleanly. |
+| `/vmstop` | Stops a VM or container at once, as pulling the plug. |
+| `/vmreset` | Resets a VM. |
+| `/nodereboot` | Reboots a node. |
+| `/nodeshutdown` | Shuts down a node. |
+| `/get`, `/set`, `/create`, `/delete` | Call any path of the Proxmox VE API, see [API commands](/cv4pve-botgram/commands/api/). |
+| `/usage` | Shows the methods and parameters of an API path, see [API commands](/cv4pve-botgram/commands/api/#usage). |
+| `/alias` | Lists, creates and deletes aliases, see [Aliases](/cv4pve-botgram/commands/aliases/). |
+
+`/start`, the first message Telegram sends to a new bot, greets you with the node the bot is connected
+to and the same list.
+
+## How a conversation works
+
+A command is a message that starts with `/`. Many commands need more than the name: the bot then asks,
+and waits for your answer.
+
+- When the choice is among things that exist (a guest, a node, a value of the API path), the bot shows
+  **buttons**: tap one.
+- When it needs free text (a parameter value, the name of an alias), it asks and you **type** the answer.
+
+Each chat has one command in progress at a time. A message that does not start with `/` is the answer to
+the command in progress; if no command is waiting, the bot replies with the list of commands. Sending a
+new command drops the one in progress.
+
+## VMs and containers
+
+`/vmstart` shows the guests that are **stopped**; `/vmshutdown`, `/vmstop` and `/vmreset` show those that
+are **running**. Only guests on nodes that are online are offered, as buttons with ID and name, one group
+per node:
+
+```text
+You   /vmshutdown
+Bot   Choose Vm
+      [ qemu/100 web01 ]  [ qemu/101 db01 ]
+      [ lxc/105 dns ]
+You   (tap "qemu/101 db01")
+Bot   VM/CT qemu/101 on node pve01 Shutdown!
+```
+
+The action starts when you tap the button: **there is no second confirmation**. The answer tells you
+Proxmox VE accepted the request, not that the guest has already changed state; if it refuses, the answer
+is `Error:` with its reason.
+
+`/vmreset` works on VMs only: a container cannot be reset.
+
+## Nodes
+
+`/nodereboot` and `/nodeshutdown` show the nodes that are online:
+
+```text
+You   /nodereboot
+Bot   Choose Node
+      [ pve01 ]  [ pve02 ]
+You   (tap "pve02")
+Bot   Node pve02 action reboot!
+```
+
+:::caution[No confirmation]
+The node reboots or shuts down as soon as you tap its name, with the guests running on it. Give
+`Sys.PowerMgmt` to the bot's token only if you want this from Telegram, see
+[Permissions](/cv4pve-botgram/permissions/).
+:::

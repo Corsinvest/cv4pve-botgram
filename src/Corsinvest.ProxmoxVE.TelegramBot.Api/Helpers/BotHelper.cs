@@ -16,6 +16,12 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Helpers;
 
 internal static class BotHelper
 {
+    //error of an API call, null when it succeeded
+    public static string? GetErrorText(this Result result)
+        => result.IsSuccessStatusCode && !result.ResponseInError
+            ? null
+            : result.ResponseInError ? result.GetError() : result.ReasonPhrase;
+
     public static Task<Message> SendTextMessageAsyncNoKeyboard(this TelegramBotClient botClient,
                                                                long chatId,
                                                                string text)

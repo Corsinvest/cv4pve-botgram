@@ -10,6 +10,6 @@ namespace Corsinvest.ProxmoxVE.TelegramBot.Api.Commands.Api;
 internal class Create : Base
 {
     public override string Name => "create";
-    public override string Description => "Get from resource and result to file";
+    public override string Description => "Create from resource and result to file";
     protected override MethodType MethodType => MethodType.Create;
 }

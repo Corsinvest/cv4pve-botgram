@@ -3,7 +3,9 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.6" />
     <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Extension" Version="9.2.4" />
     <PackageVersion Include="Corsinvest.ProxmoxVE.Api.Console" Version="9.2.4" />
     <PackageVersion Include="Telegram.Bot" Version="19.0.0" />

@@ -1,0 +1,46 @@
+---
+title: Troubleshooting
+description: What the answers and the log of cv4pve-botgram mean when something goes wrong, and how to see what it is doing.
+---
+
+import CliTroubleshooting from '@corsinvest/cv4pve-docs-theme/components/CliTroubleshooting.astro';
+
+## The bot does not answer
+
+Look at the console of the bot, or at the journal or the Windows Event Log when it runs
+[as a service](/cv4pve-botgram/service/): every
+message it receives is written there with the chat ID and the text.
+
+- **Nothing is logged when you write to the bot**: the messages do not reach this process. Check that
+  `--token` is the token of the bot you are writing to, that the machine reaches Telegram on the Internet,
+  and that no other process runs with the same token, see
+  [One bot, one process](/cv4pve-botgram/service/#one-bot-one-process).
+- **`Cannot start the Telegram bot` and the bot exits**: at start it logs in to Proxmox VE, then to
+  Telegram, and the message gives the reason. `No reachable hosts` or `Authentication failed` is about
+  `--host` or the credentials, see [Connection](/cv4pve-botgram/connection/); an error of Telegram is
+  about `--token`.
+- **`FATAL ERROR` and the bot exits**: Telegram refused the token (HTTP 401, 403 or 404). Get the token
+  again from BotFather, see [Telegram bot](/cv4pve-botgram/telegram-bot/).
+
+## What the answers mean
+
+| Answer | Meaning |
+|---|---|
+| `You not have permission in this Chat!` | The chat is not in `--chatsId`. The log line `Security: Chat Id '…'` gives its ID, see [Restrict the bot to your chats](/cv4pve-botgram/telegram-bot/#restrict-the-bot-to-your-chats). |
+| `Error: …` | Proxmox VE refused the call. The text is its reason, e.g. `Permission check failed`, followed by one line per wrong parameter. For a missing privilege see [Permissions](/cv4pve-botgram/permissions/). |
+| `Error execute command! …` or `Error CallbackQuery! …` | The command failed before or outside an API answer, e.g. a node that cannot be reached. The details are in the log of the bot. |
+| `Data not recognized '…'` | A button was pressed when no command was waiting for it, typically a button of an old message after the bot was restarted. Send the command again. |
+| The list of commands, when you expected something else | The message was not a command and no command was waiting for input, so the bot answered with `/help`. |
+
+`Error CallbackQuery! Not possible in Container` after `/vmreset` means the guest you chose is a container:
+only VMs can be reset. Use `/vmstop` and `/vmstart`.
+
+## Fewer guests or nodes than expected
+
+The guest commands offer only guests on nodes that are online, and only what the token may see: a guest
+without `VM.Audit` is not offered, with no error. See
+[How missing privileges show up](/cv4pve-botgram/permissions/#how-missing-privileges-show-up).
+
+## Debug output
+
+<CliTroubleshooting />

@@ -1,0 +1,45 @@
+---
+title: Permissions
+description: The Proxmox VE user, API token and privileges cv4pve-botgram needs, command by command.
+---
+
+cv4pve-botgram works through the API, so what a chat can do is exactly what the bot's account is allowed
+to do. Use a dedicated user with an API token rather than `root@pam`, and give it only the privileges of
+the commands you want to use from Telegram.
+
+## User and token
+
+Create a [user](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_users) or an [API token](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_tokens) and [assign it](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management) the privileges below.
+
+:::caution[Tokens with privilege separation]
+A token with privilege separation (the default in the web UI) does **not** inherit the user's
+permissions: grant the role to the token too, or cv4pve-botgram sees an empty cluster.
+:::
+
+## Privileges
+
+| Privilege | On | Used for | Without it |
+|---|---|---|---|
+| `Sys.Audit` | `/nodes` | The nodes and whether they are online: the buttons of `/nodereboot` and `/nodeshutdown`, and the guest commands, which offer only guests on online nodes | No node and no guest is offered |
+| `VM.Audit` | `/vms` | The VMs and containers offered by `/vmstart`, `/vmstop`, `/vmshutdown` and `/vmreset` | Guests are missing from the buttons |
+| `VM.PowerMgmt` | `/vms` | Starting, stopping, shutting down and resetting a guest | The bot answers with the error of Proxmox VE |
+| `Sys.PowerMgmt` | `/nodes` | Rebooting and shutting down a node | The bot answers with the error of Proxmox VE |
+
+To limit the bot to some guests, grant `VM.Audit` and `VM.PowerMgmt` on those guests or on a pool instead
+of `/vms`: the others are not offered.
+
+## API commands and aliases
+
+`/get`, `/set`, `/create`, `/delete` and the [aliases](/cv4pve-botgram/commands/aliases/) call the path
+you write, so they need the privileges of that path: the
+[API viewer](https://pve.proxmox.com/pve-docs/api-viewer/index.html) lists them for every call. The bot adds
+no limit of its own: a chat can call **any** path the token is allowed to. A token with `Administrator`
+on `/` makes a bot that can do everything, from a phone.
+
+A call the token is not allowed to make is answered with `Error:` and the reason given by Proxmox VE.
+
+## How missing privileges show up
+
+Proxmox VE does not answer with an error when an account may see only part of the cluster: it leaves out
+what the account cannot see. A guest without `VM.Audit` is simply missing from the buttons. If the bot
+offers fewer guests or nodes than you expect, check the privileges of the token.

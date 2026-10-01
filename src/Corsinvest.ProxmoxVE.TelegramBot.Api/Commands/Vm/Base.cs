@@ -30,12 +30,14 @@ internal abstract class Base : Command
 
         var client = await botManager.GetPveClientAsync();
         var vm = await client.GetVmAsync(callbackQuery.Data);
-        await VmHelper.ChangeStatusVmAsync(client, vm.Node, vm.VmType, vm.VmId, StatusToChange);
+        var error = (await VmHelper.ChangeStatusVmAsync(client, vm.Node, vm.VmType, vm.VmId, StatusToChange)).GetErrorText();
 
         if (callbackQuery.Message != null)
         {
             await botManager.BotClient.SendTextMessageAsyncNoKeyboard(callbackQuery.Message.Chat.Id,
-                                                                      $"VM/CT {vm.Id} on node {vm.Node} {StatusToChange}!");
+                                                                      error == null
+                                                                        ? $"VM/CT {vm.Id} on node {vm.Node} {StatusToChange}!"
+                                                                        : $"Error: {error}");
         }
 
         return true;

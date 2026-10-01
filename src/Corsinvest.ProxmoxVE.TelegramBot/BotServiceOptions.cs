@@ -14,5 +14,10 @@ internal sealed class BotServiceOptions
     public string? Password { get; set; }
     public string? ApiToken { get; set; }
     public bool ValidateCertificate { get; set; }
-    public bool ServiceMode { get; set; }
+
+    /// <summary>--service-mode was passed: it has no effect, the bot warns about it at start.</summary>
+    public bool DeprecatedServiceMode { get; set; }
+
+    /// <summary>Exit code of the process: 1 when the bot could not start or had to stop.</summary>
+    public int ExitCode { get; set; }
 }

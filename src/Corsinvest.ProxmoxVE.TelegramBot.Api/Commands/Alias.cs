@@ -81,9 +81,10 @@ internal class Alias : Command
                 break;
 
             case RequestType.DeleteRequestName:
-                if (_aliasManager.Exists(message.Text!))
+                if (_aliasManager.Remove(message.Text!.Trim()))
                 {
-                    _aliasManager.Remove(message.Text!);
+                    _aliasManager.Save();
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Alias deleted!");
                 }
                 else
                 {
@@ -113,9 +114,15 @@ internal class Alias : Command
                 break;
 
             case RequestType.CreateRequestCommand:
-                _aliasManager.Create(_name, _description, message.Text!.Trim(), false);
-                await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command created!");
-                _aliasManager.Save();
+                if (_aliasManager.Create(_name, _description, message.Text!.Trim(), false))
+                {
+                    _aliasManager.Save();
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, "Command created!");
+                }
+                else
+                {
+                    await botManager.BotClient.SendTextMessageAsyncNoKeyboard(message.Chat.Id, $"Name not valid '{_name}'");
+                }
                 endCommand = true;
                 break;
 
