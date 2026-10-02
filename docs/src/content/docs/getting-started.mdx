@@ -1,6 +1,8 @@
 ---
-title: Getting started
+title: Install cv4pve-botgram, the Telegram bot for Proxmox VE
 description: Install cv4pve-botgram, connect it to a Proxmox VE cluster and to your Telegram bot, and send the first command.
+sidebar:
+  label: Getting started
 ---
 
 import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
@@ -57,7 +59,7 @@ To keep it running after you close the terminal, see [Run as a service](/cv4pve-
 Host, API token, username and password, certificates and keeping the options in a file: see
 [Connection](/cv4pve-botgram/connection/).
 
-:::danger[Always set --chatsId]
+:::danger[Always set `--chatsId`]
 Without `--chatsId` the bot answers **every** chat: anyone who finds the bot in Telegram can use it with
 the privileges of its API token. Set it on every run that is not a first test.
 :::
