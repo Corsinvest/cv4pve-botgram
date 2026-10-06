@@ -42,7 +42,7 @@ To find the ID of your chat:
 1. Start the bot with an ID that matches no chat:
 
    ```bash
-   cv4pve-botgram --host=pve1.local --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=0
+   cv4pve-botgram --host=pve01 --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=0
    ```
 
 2. Send any message to the bot from Telegram. It refuses you, and the console shows the ID:
@@ -55,7 +55,7 @@ To find the ID of your chat:
 3. Stop the bot and start it again with that ID. Several chats are separated by commas:
 
    ```bash
-   cv4pve-botgram --host=pve1.local --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=123456789,987654321
+   cv4pve-botgram --host=pve01 --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=123456789,987654321
    ```
 
 The chat ID decides who may talk to the bot; the privileges of the Proxmox VE token decide what the bot
