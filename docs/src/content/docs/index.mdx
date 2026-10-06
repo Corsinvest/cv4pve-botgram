@@ -25,20 +25,25 @@ hero:
 
 import FeatureGrid from '@corsinvest/cv4pve-docs-theme/components/FeatureGrid.astro';
 import CtaBand from '@corsinvest/cv4pve-docs-theme/components/CtaBand.astro';
+import Motto from '@corsinvest/cv4pve-docs-theme/components/Motto.astro';
+import CliInstall from '@corsinvest/cv4pve-docs-theme/components/CliInstall.astro';
 import proxmoxLogo from '../../assets/proxmox-logo.svg';
 
 export const features = [
-  { title: "VMs and containers", text: "Start, stop, shut down and reset: the bot lists the guests as buttons, grouped by node, and you tap the one you want.", href: 'commands/#vms-and-containers' },
-  { title: "Nodes", text: "Reboot or shut down a node, chosen from the nodes that are online.", href: 'commands/#nodes' },
-  { title: "Any API call", text: "get, set, create and delete on any path of the Proxmox VE API. Leave a placeholder in the path and the bot asks for it with buttons.", href: 'commands/api/' },
-  { title: "Aliases", text: "Short names for the calls you repeat, such as /qsts for the status of a VM. Many are built in, and you add your own from the chat.", href: 'commands/aliases/' },
-  { title: "Only your chats", text: "The bot answers only the chat IDs you list. Any other chat is refused and written to the log.", href: 'telegram-bot/#restrict-the-bot-to-your-chats' },
-  { title: "Runs as a service", text: "One self-contained binary for Linux, Windows and macOS: a native systemd and Windows service, with no wrapper.", href: 'service/' },
+  { icon: 'mdi:monitor-multiple', title: "VMs and containers", text: "Start, stop, shut down and reset: the bot lists the guests as buttons, grouped by node, and you tap the one you want.", href: 'commands/#vms-and-containers' },
+  { icon: 'mdi:server-outline', title: "Nodes", text: "Reboot or shut down a node, chosen from the nodes that are online.", href: 'commands/#nodes' },
+  { icon: 'mdi:api', title: "Any API call", text: "get, set, create and delete on any path of the Proxmox VE API. Leave a placeholder in the path and the bot asks for it with buttons.", href: 'commands/api/' },
+  { icon: 'mdi:tag-outline', title: "Aliases", text: "Short names for the calls you repeat, such as /qsts for the status of a VM. Many are built in, and you add your own from the chat.", href: 'commands/aliases/' },
+  { icon: 'mdi:shield-account-outline', title: "Only your chats", text: "The bot answers only the chat IDs you list. Any other chat is refused and written to the log.", href: 'telegram-bot/#restrict-the-bot-to-your-chats' },
+  { icon: 'mdi:cog-sync-outline', title: "Runs as a service", text: "For Linux, Windows and macOS: a native systemd and Windows service, with no wrapper.", href: 'service/' },
 ];
 
-```bash
-cv4pve-botgram --host=pve01 --api-token='bot@pve!bot=…' --token='<telegram-bot-token>' --chatsId=<chat-id>
-```
+<Motto />
+
+<CliInstall
+  repo="cv4pve-botgram"
+  run={['--host=pve01', "--api-token='bot@pve!bot=…'", "--token='<telegram-bot-token>'", '--chatsId=<chat-id>']}
+/>
 
 Then, in the chat with your bot:
 

@@ -68,7 +68,7 @@ Bot   (a file with the status of VM 100)
 - **Placeholders**: leave `{node}` or `{vmid}` in a path and the bot offers the values that exist; leave one in a parameter and it asks you to type it.
 - **Aliases**: short names for the calls you repeat. Many are built in for cluster, nodes, VMs and containers, and you add your own from the chat.
 - **Only your chats**: the bot answers only the chat IDs you list; any other chat is refused and logged.
-- **Runs as a service**: one self-contained binary for Linux, Windows and macOS, a native systemd (`Type=notify`) and Windows service, with no wrapper.
+- **Runs as a service**: for Linux, Windows and macOS, a native systemd (`Type=notify`) and Windows service, with no wrapper.
 - **Keeps running with a node down**: give it more than one host and it uses the first that answers.
 
 ---
@@ -84,7 +84,7 @@ wget https://github.com/Corsinvest/cv4pve-botgram/releases/latest/download/cv4pv
 unzip cv4pve-botgram-linux-x64.zip && chmod +x cv4pve-botgram
 
 # Run against any node of the cluster, with an API token and the token of your Telegram bot
-./cv4pve-botgram --host=pve1.local --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=<chat-id>
+./cv4pve-botgram --host=pve01 --api-token='bot@pve!bot=<uuid>' --token='<telegram-bot-token>' --chatsId=<chat-id>
 ```
 
 Then send `/help` to your bot. The Telegram token comes from BotFather, see [Telegram bot](https://corsinvest.github.io/cv4pve-botgram/telegram-bot/). Always set `--chatsId`: without it the bot answers every chat. The API token needs the privileges listed in [Permissions](https://corsinvest.github.io/cv4pve-botgram/permissions/).
@@ -119,6 +119,10 @@ Professional support and consulting available through [Corsinvest](https://www.c
 
 ---
 
-Part of [cv4pve](https://www.corsinvest.it/cv4pve) suite | Made with ❤️ in Italy by [Corsinvest](https://www.corsinvest.it)
+**By sysadmins, for sysadmins.**
+
+Part of [cv4pve](https://www.corsinvest.it/en/cv4pve/) suite | Made with ❤️ in Italy by [Corsinvest](https://www.corsinvest.it)
+
+Proxmox® is a registered trademark of Proxmox Server Solutions GmbH. cv4pve is developed by Corsinvest and is not a Proxmox product.
 
 Copyright © Corsinvest Srl

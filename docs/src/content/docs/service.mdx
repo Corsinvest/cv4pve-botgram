@@ -35,7 +35,7 @@ tokens do not appear in the process list or in the unit.
    sudo install -d -m 750 -o root -g cv4pve-botgram /etc/cv4pve-botgram
    cd /etc/cv4pve-botgram
    sudo tee connection.conf > /dev/null <<'EOF'
-   --host=pve1.local,pve2.local
+   --host=pve01,pve02
    --api-token=bot@pve!bot=<uuid>
    --token=<telegram-bot-token>
    --chatsId=123456789
@@ -105,7 +105,7 @@ read only at start.
    ```powershell
    $dir = 'C:\ProgramData\cv4pve-botgram'
    New-Item -ItemType Directory -Force $dir | Out-Null
-   Set-Content "$dir\connection.conf" "--host=pve1.local,pve2.local`n--api-token=bot@pve!bot=<uuid>`n--token=<telegram-bot-token>`n--chatsId=123456789"
+   Set-Content "$dir\connection.conf" "--host=pve01,pve02`n--api-token=bot@pve!bot=<uuid>`n--token=<telegram-bot-token>`n--chatsId=123456789"
    ```
 
    Then restrict `C:\ProgramData\cv4pve-botgram` to Administrators and SYSTEM: the file holds the tokens.
